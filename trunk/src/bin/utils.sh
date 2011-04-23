@@ -18,6 +18,11 @@ checkCurrentScriptAlreadyRunning() {
   fi
 }
 
+initPostulaEnvironment() {
+  # TODO: decidir de que manera saber si el ambiente está inicializado
+  export POSTULA_ENV='something'
+}
+
 checkEnvironmentLoaded() {
   # TODO: decidir de que manera saber si el ambiente está inicializado
   if [[ ! -n "${POSTULA_ENV+x}" ]]
