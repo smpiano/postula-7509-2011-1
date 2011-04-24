@@ -6,9 +6,9 @@ log() {
 
 checkCurrentScriptAlreadyRunning() {
   # Listar todos los comandos | filtrar los que tienen el nombre de archivo y no son 'grep' | contar la cantidad de comandos
-  count=`ps -o command=''  | grep -e "$0" | grep -v grep | wc -l`
+  count=`ps eo command=''  | grep -e "$0" | grep -v grep | wc -l`
   # Descontar el fork creado por el backtick
-  let "count -= 1"
+  count=$(( $count - 1 ))
 
   if [[ ! $count -eq 1 ]]
   then
@@ -20,7 +20,7 @@ checkCurrentScriptAlreadyRunning() {
 
 initPostulaEnvironment() {
   # TODO: decidir de que manera saber si el ambiente está inicializado
-  export POSTULA_ENV='something'
+  export POSTULA_ENV='something' MAESTRO_AGENCIAS='agencias.mae'
 }
 
 checkEnvironmentLoaded() {
