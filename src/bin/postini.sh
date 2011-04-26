@@ -73,7 +73,7 @@ else
 	LOGDIR="$grupo/log"             # Directorio para los archivos de log de los comandos
 	LOGEXT="log"                    # Extension de los archivos de log
 	MAXLOGSIZE="500"                # Tamanio maximo de los archivos de log
-	USERID="prueba01"               # Usuario de la instalacion
+	USERID=`whoami`			# Usuario de la instalacion
 	FECINS=`date +%d/%m/%Y\ %H:%M`  # Fecha y Hora de inicio de instalacion
 
 	# Valido la existencia
