@@ -112,10 +112,10 @@ fi #[ $tipo = "I" -o $tipo = "A" -o $tipo = "E" -o $tipo = "ES" ]
 mensaje=$4
 
 #TODO: Modificar el contenido de estas variables usando las variables de entorno
-directorio_grupo=`grep 'CURRDIR=' instula.conf | cut -d= -f2` #Obtengo el directorio en el que debo posicionarme para ejecutar los comandos
-directorio_logs=`grep 'LOGDIR=' instula.conf | cut -d= -f2` #Obtengo el directorio en donde se almacenan los logs
-extension_arch_log=`grep 'LOGEXT=' instula.conf | cut -d= -f2` #Obtengo la extensión del archivo de log (sin .)
-max_size_log=`grep 'MAXLOGSIZE=' instula.conf | cut -d= -f2` #Obtengo el máximo tamaño que puede ocupar un archivo de log
+directorio_grupo=$CURRDIR #Obtengo el directorio en el que debo posicionarme para ejecutar los comandos
+directorio_logs=$LOGDIR #Obtengo el directorio en donde se almacenan los logs
+extension_arch_log=$LOGEXT #Obtengo la extensión del archivo de log (sin .)
+max_size_log=$MAXLOGSIZE #Obtengo el máximo tamaño que puede ocupar un archivo de log
 
 
 #Verifico si existe el directorio de los archivos de log
