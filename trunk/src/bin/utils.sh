@@ -33,10 +33,44 @@ checkEnvironmentLoaded() {
   fi
 }
 
+mayor() {
+  # Mientras que tenga mas de dos parámetros
+  while [[ $# -ge 2 ]]; do
+    # Si el primero (que es el que va a descartar el shift)
+    # es mayor, entonces invierto el orden para descartar el segundo
+    if [[ "$1" > "$2" ]]; then
+      set "$2" "$1" "${@:3}"
+    fi
+    shift
+  done
+  echo $1
+}
+
+menor() {
+  # Mientras que tenga mas de dos parámetros
+  while [[ $# -ge 2 ]]; do
+    # Si el primero (que es el que va a descartar el shift)
+    # es mayor, entonces invierto el orden para descartar el segundo
+    if [[ "$1" < "$2" ]]; then
+      set "$2" "$1" "${@:3}"
+    fi
+    shift
+  done
+  echo $1
+}
+
 verificarFecha() {
   if [[ "$TERM_PROGRAM" = "Apple_Terminal" ]]; then
-    date -j -f "%Y-%m-%d" "$1"
+    date -j -f "%Y-%m-%d" "$1" 2> /dev/null
   else
     date +"%Y-%m-%d" --date "$1"
+  fi
+}
+
+sumarMeses() {
+  if [[ "$TERM_PROGRAM" = "Apple_Terminal" ]]; then
+    date -j -r $(expr `date -j -f "%Y-%m-%d" "$1" +"%s"` + $2 \* 2592000) +"%Y-%m-%d"
+  else
+    date --date "$1 +$2 month"
   fi
 }
