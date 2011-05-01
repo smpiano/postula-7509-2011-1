@@ -1,3 +1,3 @@
 buscar_agencia() {
-  cat $MAESTRO_AGENCIAS | grep "^[^,]*,$1,"
+  grep "^[^,]*,$1," $MAESTRO_AGENCIAS
 }

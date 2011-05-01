@@ -20,7 +20,7 @@ checkCurrentScriptAlreadyRunning() {
 
 initPostulaEnvironment() {
   # TODO: decidir de que manera saber si el ambiente está inicializado
-  export POSTULA_ENV='something' MAESTRO_AGENCIAS='agencias.mae'
+  export POSTULA_ENV='something' MAESTRO_AGENCIAS='agencias.mae' MAESTRO_BENEFICIOS='beneficios.mae'
 }
 
 checkEnvironmentLoaded() {
@@ -30,5 +30,13 @@ checkEnvironmentLoaded() {
     log "Environment not loaded :("
     # Salir con false para poder manejar cancelación del script
     false
+  fi
+}
+
+verificarFecha() {
+  if [[ "$TERM_PROGRAM" = "Apple_Terminal" ]]; then
+    date -j -f "%Y-%m-%d" "$1"
+  else
+    date +"%Y-%m-%d" --date "$1"
   fi
 }
