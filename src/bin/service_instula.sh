@@ -28,8 +28,7 @@ EXISTE_VARIABLE=`cat $INSTULA_CONF | grep "$NOMBRE"`
 # Si el valor contiene algo significa que quieren hacer un SET
 if [ -z  "$VALOR" ]
 then
-	local path=`echo $EXISTE_VARIABLE | cut -f2 -d\=`
-	echo $path
+	echo `echo $EXISTE_VARIABLE | cut -f2 -d\=`
 else
 	if [ -z "$EXISTE_VARIABLE" ]
 	then
