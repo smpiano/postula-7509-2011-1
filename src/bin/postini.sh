@@ -3,7 +3,7 @@
 # Funcion que imprime el valor de las variables
 evariables () {
 	echo "CURRDIR=$CURRDIR";
-        echo "grupo=$grupo";
+        echo "GRUPO=$GRUPO";
         echo "ARRIDIR=$ARRIDIR";
         echo "BINDIR=$BINDIR";
         echo "CONFDIR=$CONFDIR";
@@ -17,7 +17,8 @@ evariables () {
 
 # Funcion que corre POSTONIO
 runPostonio () {
-	sh $POSTONIO
+	#Nico tiene que editar aca.
+	#./postonio.sh start
 	EXIT=`echo $?`
 	if [ $EXIT != 0 ]
 	then
@@ -34,26 +35,21 @@ exist () {
 		echo "Verificando ruta \"$1\" OK"
 	else
 		echo "La ruta \"$1\" no existe, necesita crear dicha ruta para ejecutar POSTINI"
-		exit 2
 	fi
 }
 
 echo "...::: POSTINI :::..."
 
 # Necesidad del pasaje de un parametro
-if [ $# != 1 ] 
-then
-	echo "Se debe pasar un parametro, el nombre del demonio POSTONIO [para test usar: xorg]"
-	exit 1
-fi
-
-# Variable que representa el nombre del demonio POSTONIO
-POSTONIO=$1
+#if [ $# != 1 ] 
+#then
+#	echo "Se debe pasar un parametro, el nombre del demonio POSTONIO [para test usar: xorg]"
+#	exit 1
+#fi
 
 
 # Comando que verifica la existencia de las variables de inicializacion de ambiente
-PARAM_ORIG_GRUPO="grupo02"
-CHECK=`echo $PATH | grep $PARAM_ORIG_GRUPO`
+CHECK=`echo $PATH | grep 'grupo02'`
 
 if [ ! -z "$CHECK"  ]
 then
@@ -64,31 +60,31 @@ then
 else
 
 	# Seteo las variables de entorno para la sesion del usuario (la idea seria que me lleguen como parametro)
-	CURRDIR="$PWD"                  # Directorio Actual de trabajo 
-	grupo="$PWD/grupo02"            # Directorio del grupo
-	ARRIDIR="$PWD/arribos"          # Directorio de arribos de archivos externos 
-	BINDIR="$PWD/bin"               # Directorio para los ejecutables
-	CONFDIR="$grupo/conf"           # Directorio para los archivos de configuracion
-	DATASIZE="200"                  # Espacio minimo necesario en el directorio ARRIDIR en Mb
-	LOGDIR="$grupo/log"             # Directorio para los archivos de log de los comandos
-	LOGEXT="log"                    # Extension de los archivos de log
-	MAXLOGSIZE="500"                # Tamanio maximo de los archivos de log
+	CURRDIR="$PWD"					# Directorio Actual de trabajo 
+	GRUPO=`./service_instula.sh GRUPO`		# Directorio del grupo
+	ARRIDIR=`./service_instula.sh ARRIDIR`		# Directorio de arribos de archivos externos 
+	BINDIR=`./service_instula.sh BINDIR`		# Directorio para los ejecutables
+	CONFDIR=`./service_instula.sh CONFDIR`		# Directorio para los archivos de configuracion
+	DATASIZE=`./service_instula.sh DATASIZE`	# Espacio minimo necesario en el directorio ARRIDIR en Mb
+	LOGDIR=`./service_instula.sh LOGDIR`		# Directorio para los archivos de log de los comandos
+	LOGEXT=`./service_instula.sh LOGEXT`		# Extension de los archivos de log
+	MAXLOGSIZE=`./service_instula.sh MAXLOGSIZE`	# Tamanio maximo de los archivos de log
 	USERID=`whoami`			# Usuario de la instalacion
 	FECINS=`date +%d/%m/%Y\ %H:%M`  # Fecha y Hora de inicio de instalacion
 
 	# Valido la existencia
-	exist $grupo
-	exist $ARRIDIR
-	exist $BINDIR
-	exist $CONFDIR
-	exist $LOGDIR
+	#exist $GRUPO
+	#exist $ARRIDIR
+	#exist $BINDIR
+	#exist $CONFDIR
+	#exist $LOGDIR
 
 	# Seteo la variable PATH
-	PATH=$PATH:$grupo:$ARRIDIR:$CONFDIR:$BINDIR
+	PATH=$PATH:$GRUPO:$ARRIDIR:$CONFDIR:$BINDIR
 
 	# Exporto las variables
 	export CURRDIR
-	export grupo
+	export GRUPO
 	export ARRIDIR
 	export BINDIR
 	export CONFDIR
@@ -105,7 +101,7 @@ else
         evariables
 	
 	# Verifico si esta postonio levantado
-	postonio=`ps -ef | grep -v grep | grep $POSTONIO`
+	postonio=`ps -ef | grep -v grep | grep 'postonio'`
 
 	if [ -z "$postonio" ]
 	then
@@ -122,8 +118,5 @@ else
 
 		echo "Demonio corriendo bajo el Nro.: $postonio"
 	fi
-
-        # Defino las variables en un subshell superior
-        bash
 
 fi
