@@ -3,13 +3,18 @@ source ./utils.sh
 source ./agencia_helpers.sh
 source ./beneficio_helpers.sh
 
-DIR_ARRIBOS=arribos
-
+GRUPO=${GRUPO:-$PWD/grupo02}
+PATH=$PATH:$PWD
+DIR_ARRIBOS=${ARRIDIR:-arribos}
+MAESTRO_AGENCIAS=${MAESTRO_AGENCIAS:-$GRUPO/agencias.mae} 
+MAESTRO_BENEFICIOS=${MAESTRO_BENEFICIOS:-$GRUPO/beneficios.mae}
+export LOGDIR="$GRUPO/logs" LOGEXT='log' MAXLOGSIZE=1000
 CAMPOS_NOVEDAD=( CUIL 'Tipo doc' 'Nro doc' Apellido Nombre Domicilio Localidad Provincia 'Código de Beneficio' 'Fecha pedido de Alta' 'Duración pedida' )
+VERBOSE=true
+POSTULA_ENV='s'
+DIR_RECIBIDOS=$GRUPO/recibidos
+DIR_PROCESADOS=$GRUPO/procesados
 main() {
-
-  # Esto debería ser hecho sólo por postini...
-  initPostulaEnvironment
 
   # die if existe otro postular corriendo
   checkCurrentScriptAlreadyRunning || exit 1
@@ -17,36 +22,53 @@ main() {
   # die if el ambiente no esta cargado
   checkEnvironmentLoaded || exit 1
 
-  cd $DIR_ARRIBOS
-  while next_file=`ls | grep '^.\{6\}\.[0-9]\{1,\}$' | head -n 1`; [[ $next_file != '' ]]; do
+  cd $DIR_RECIBIDOS
+  local output_file="$GRUPO/benef.$$"
+  local error_file="$GRUPO/benerro.$$"
+
+  while local archivo_novedades=`ls | grep '^.\{6\}\.[0-9]\{1,\}$' | head -n 1`; [[ $archivo_novedades != '' ]]; do
     # Rechazar si agencia no existe
-    agencia=${next_file::6}
-    info_agencia=`buscar_agencia $agencia`
-    if [[ -z $info_agencia ]]; then
-      log "agencia desconocida $agencia, se rechaza el archivo $next_file"
-      mv $next_file $next_file.invalido
+    local agencia=${archivo_novedades::6}
+
+    # Recuperar la información de la agencia
+    DATOS_AGENCIA=`buscar_agencia $agencia`
+    if [[ -z $DATOS_AGENCIA ]]; then
+      log "Agencia desconocida $agencia, se rechaza el archivo $archivo_novedades"
+      mover $archivo_novedades $archivo_novedades.invalido
       continue
     fi
 
-    contador=0
+    info "Comenzando a procesar agencia: $agencia, archivo: $archivo_novedades"
+
+    local numero_de_registros=0
+    local cantidad_con_error=0
+    local cantidad_nuevo=0
     while read novedad; do
-      contador=$(( $contador + 1 ))
+      (( numero_de_registros= $numero_de_registros + 1 ))
 
       # Validar formato registro
-      checkFormatoNovedad $next_file $contador "$novedad" || continue
+      checkFormatoNovedad $archivo_novedades $numero_de_registros "$novedad" 2>> $error_file \
+        || ((cantidad_con_error= cantidad_con_error + 1)) && continue
 
       # Validar campos
-      checkCamposNovedad $next_file $contador "$novedad"
+      checkCamposNovedad $archivo_novedades $numero_de_registros "$novedad" \
+        && ((cantidad_nuevo= cantidad_nuevo + 1))
 
       # Calcular campos
-      generarBeneficio $next_file "$novedad" >> novedades.$$
-    done < "$next_file"
+      generarBeneficio $archivo_novedades "$novedad" >> $output_file
+    done < "$archivo_novedades"
+
+    info "Se finalizó de procesar el archivo $archivo_novedades"
+    info "- Total de registros           : $numero_de_registros"
+    info "- Total de registros con error : $cantidad_con_error"
+    info "- Total de beneficiarios nuevos: $cantidad_nuevo"
 
     # Enviar a recibidos
-    mv $next_file $next_file.old
+    mover $archivo_novedades $DIR_PROCESADOS
   done
-  # presentar estadisticas
 
+  # presentar estadisticas
+  exit 0
 }
 
 # Por cada archivo a procesar
@@ -54,24 +76,18 @@ checkFormatoNovedad() {
   # $1 => Nombre archivo
   # $2 => Numero de Registro
   # $3 => Registro de novedad
-  cantidad_de_campos=$(( `echo "$3" | grep -o ',' | wc -l` + 1 ))
+  local cantidad_de_campos=$(( `echo "$3" | grep -o ',' | wc -l` + 1 ))
 
   if [[ $cantidad_de_campos -eq 11 ]]; then
-
-    # Cambiar las comas por espacios y los espacios por comas
-    # splittable=`echo "$3" | tr ' ,' ', '`
 
     # Convertir la novedad en un array
     ARRAY_NOVEDAD=()
     for i in {1..11}; do
       ARRAY_NOVEDAD[$i-1]=`echo $3 | cut -f $i -d ,`
     done
-    # for campo in $splittable; do
-    #   # Cargar el campo en el arreglo corrigiendo las comas por los espacios originales
-    #   ARRAY_NOVEDAD[${#ARRAY_NOVEDAD[@]}]="`echo $campo | tr , ' '`"
-    # done
 
     # Validar campos obligatorios
+    local error=""
     for i in {0..8}; do
       if [[ -z ${ARRAY_NOVEDAD[$i]} ]]; then
         rechazarRegistro "$@" "Campo ${CAMPOS_NOVEDAD[$i]} no informado"
@@ -83,11 +99,15 @@ checkFormatoNovedad() {
     [[ $error != 'true' ]]
 
   elif [[ $cantidad_de_campos -lt 11 ]]; then
+
     rechazarRegistro "$@" 'Registro con campos de menos'
     false
+
   else # Mas de 11 campos
+
     rechazarRegistro "$@" 'Registro con campos de mas'
     false
+
   fi
 }
 
@@ -127,9 +147,13 @@ checkCamposNovedad() {
     rechazarBeneficio "DP (${ARRAY_NOVEDAD[10]}) menor o igual que 0"
   fi
 
+  [[ "$ESTADO_RECHAZO" = "" ]]
 }
 
 generarBeneficio() {
+
+  # $1 => Nombre archivo
+  # $2 => Registro de novedad
 
   FC=`date +'%Y-%m-%d'`
 
@@ -152,9 +176,8 @@ generarBeneficio() {
 
   FF=`menor $(sumarMeses $FEA $DURACION) $(fecha_baja_beneficio "$datos_beneficio")`
 
-  # Agencia, del nombre del archivo de postulantes
-  # Secuencia, del nombre del archivo de postulantes
-  echo -n `echo $1 | sed 's/\.\([^.]*\)$/,\1/'`,
+  # Agencia, del nombre del archivo de postulantes \
+  # Secuencia, del nombre del archivo de postulantes \
   # Los 10 primeros campos del archivo de postulantes (sin modificar)
   # Cuil, del archivo de postulantes
   # Tipo doc, del archivo de postulantes
@@ -166,21 +189,17 @@ generarBeneficio() {
   # Provincia, del archivo de postulantes
   # Código de beneficio, del archivo de postulantes
   # Fecha Pedida de Alta , del archivo de postulantes
-  echo -n "`echo $2 | cut -f 1-10 -d ,`",
   # Fecha Efectiva de Alta, calculada
-  echo -n $FEA,
   # Estado, calculado, valores posibles: rechazado o aceptado o pendiente
-  echo -n $ESTADO,
   # Duración, del archivo de postulantes o calculada
-  echo -n $DURACION,
   # Fecha Finalización, calculada
-  echo -n $FF,
   # Motivo, N caracteres, explica el motivo del estado asignado
-  echo -n $MOTIVOS_RECHAZO,
   # Usuario, calculado, nombre del usuario
-  echo -n `whoami`,
   # Fecha Corriente, calculada, fecha actual
-  echo $FC
+  printf "%s,%s,%s,%s,%s,%s,%s,%s,%s\n" \
+    "`echo $1 | sed 's/\.\([^.]*\)$/,\1/'`" \
+    "`echo $2 | cut -f 1-10 -d ,`" \
+    "$FEA" "$ESTADO" "$DURACION" "$FF" "$MOTIVOS_RECHAZO" `whoami` "$FC"
 }
 
 rechazarRegistro() {
@@ -188,10 +207,14 @@ rechazarRegistro() {
   # $2 => Numero de Registro
   # $3 => Registro de novedad
   # $4 => Motivo de Rechazo
-  echo "param 1 $1"
-  echo "param 2 $2"
-  echo "param 3 $3"
-  echo "param 4 $4"
+
+  # Agencia, del nombre del archivo de postulantes
+  # Secuencia, del nombre del archivo de postulantes
+  # Numero de registro
+  # Motivo
+  # Registro original
+  printf "%s,%s,%s,%s\n" \
+    "`echo $1 | sed 's/\.\([^.]*\)$/,\1/'`" "$2" "$4" "$3" >&2
 }
 
 rechazarBeneficio() {

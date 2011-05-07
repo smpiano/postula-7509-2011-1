@@ -1,33 +1,40 @@
 #!/bin/bash
 log() {
   # TODO: Reemplazar por la llamada al script logger
-  echo $1
+  comando=`basename $0`
+  gralog.sh ${comando%.*} "${3:-$comando}" "${2:-A}" "$1"
+  if [ -n "$VERBOSE" ]; then
+    echo $1 >&2
+  fi
+}
+
+info() {
+  log "$1" "I" "${@:2}"
+}
+
+error() {
+  log "$1" "E" "${@:2}"
 }
 
 checkCurrentScriptAlreadyRunning() {
   # Listar todos los comandos | filtrar los que tienen el nombre de archivo y no son 'grep' | contar la cantidad de comandos
-  count=`ps eo command=''  | grep -e "$0" | grep -v grep | wc -l`
+  count=`ps eo command='' | grep -v grep | grep -c -e "$0"`
   # Descontar el fork creado por el backtick
   count=$(( $count - 1 ))
 
   if [[ ! $count -eq 1 ]]
   then
-    log "process is already running $0"
+    error "process is already running $0 `ps eo command='' | grep -v grep`"
     # Salir con false para poder manejar cancelación del script
     false
   fi
-}
-
-initPostulaEnvironment() {
-  # TODO: decidir de que manera saber si el ambiente está inicializado
-  export POSTULA_ENV='something' MAESTRO_AGENCIAS='agencias.mae' MAESTRO_BENEFICIOS='beneficios.mae'
 }
 
 checkEnvironmentLoaded() {
   # TODO: decidir de que manera saber si el ambiente está inicializado
   if [[ ! -n "${POSTULA_ENV+x}" ]]
   then
-    log "Environment not loaded :("
+    error "Environment not loaded :("
     # Salir con false para poder manejar cancelación del script
     false
   fi
@@ -60,7 +67,7 @@ menor() {
 }
 
 verificarFecha() {
-  if [[ "$TERM_PROGRAM" = "Apple_Terminal" ]]; then
+  if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
     date -j -f "%Y-%m-%d" "$1" 2> /dev/null
   else
     date +"%Y-%m-%d" --date "$1"
@@ -68,9 +75,15 @@ verificarFecha() {
 }
 
 sumarMeses() {
-  if [[ "$TERM_PROGRAM" = "Apple_Terminal" ]]; then
-    date -j -r $(expr `date -j -f "%Y-%m-%d" "$1" +"%s"` + $2 \* 2592000) +"%Y-%m-%d"
+  if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
+    fecha_en_segundos=`date -j -f "%Y-%m-%d" "$1" +"%s" 2> /dev/null || date +"%s"`
+    date -j -r $(expr $fecha_en_segundos + ${2:-0} \* 2592000 2> /dev/null || echo "0") +"%Y-%m-%d" 2> /dev/null || $1
   else
     date --date "$1 +$2 month"
   fi
+}
+
+mover() {
+  # TODO Reemplazar por el script mover
+  mv "$@"
 }
