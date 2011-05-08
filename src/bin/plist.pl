@@ -1,17 +1,9 @@
 #!/usr/bin/perl
-#use strict;
-#use warnings;
 use Getopt::Long qw(:config bundling);
 
 ########## Cuerpo Principal ###########
 
-my @agencias;
-my @beneficios;
-my @estados;
-my $genera_matriz;
-my $salida_archivo;
-my $salida_pantalla;
-my $imprime_ayuda;
+# Guardo los parametros para mostrarlos en el encabezado
 
 my $parametros;
 my $i = 0;
@@ -20,8 +12,15 @@ while ($i < @ARGV) {
 	$i++;
 }
 
-
 # Parseo de argumentos
+
+my @agencias;
+my @beneficios;
+my @estados;
+my $genera_matriz;
+my $salida_archivo;
+my $salida_pantalla;
+my $imprime_ayuda;
 
 my $resultado = GetOptions(	
 	"a:s" => \@agencias,
@@ -33,12 +32,13 @@ my $resultado = GetOptions(
 	"h" => \$imprime_ayuda,
 );
 
+# Luego de GetOptions lo que queda en ARG son los archivos
 my @archivos = @ARGV;
 
+# Si ingreso la opcion -h muestro la ayuda
 if ($imprime_ayuda) {
 	imprimir_ayuda();
 }
-
 
 # Validacion de los parametros ingresados
 
@@ -49,7 +49,8 @@ validar_estados(@estados);
 setear_salida($salida_pantalla, $salida_archivo);
 mostrar_encabezado($parametros);
 
-
+# Hago un join y un split porque permito que ingrese los argumentos separados por comas o bien
+# ingresando la opcion varias veces. Ejemplo: -a arg1,arg2,arg3 -a arg4 -a arg5,arg6
 @agencias = split(/,/,join(',',@agencias));
 @beneficios = split(/,/,join(',',@beneficios));
 
@@ -74,8 +75,12 @@ while ($i < @archivos) {
 		my $nro_linea = 0;
 		my $cant_registros = 0;
 
+		# Leo el archivo linea por linea
+
 		while (my $linea = <$input>) {
 			$nro_linea++;
+
+			# Obtengo de la linea, los registros separados por comas
 			my @registros = split(",",$linea);
 
 			if (@registros == 19) {
@@ -95,7 +100,7 @@ while ($i < @archivos) {
 				next unless coincide_estado($estado, @estados);
 
 				if ($genera_matriz) {
-					# Genero la matriz de control (hash de hashes) e incremento la cantidad de beneficiarios por provincia y beneficio.
+					# Genero la matriz de control (hash de hashes) incrementando la cantidad de beneficiarios por provincia y beneficio.
 					$matriz_control{$provincia}{$beneficio} ++;
 
 					# Guardo una lista de todos los beneficios que se muestran
@@ -128,7 +133,7 @@ while ($i < @archivos) {
 		
 			my %total_por_beneficio;
 
-			# Imprimo por cada provincia la cantidad de beneficiarios de cada beneficio
+			# Imprimo por cada provincia (fila) la cantidad de beneficiarios de cada beneficio (columna)
 			foreach my $provincia (sort keys %matriz_control) {
 
 				my $fila .= $provincia."|";
@@ -143,6 +148,7 @@ while ($i < @archivos) {
 					$cantidad_beneficiarios = formatear_cantidad($cantidad_beneficiarios);
 					$fila .= $cantidad_beneficiarios."|";
 				}
+				#Imprimo los totales por provincia en la ultima columna
 				$total_por_provincia = formatear_cantidad($total_por_provincia);
 				$fila .= $total_por_provincia."|";
 				print $fila."\n";
@@ -174,6 +180,7 @@ exit 0;
 
 ########## Subrutinas ###########
 
+# Valida que existan archivos para procesar
 sub validar_archivos {
 	@archivos = @_;
 	if (@archivos == 0) {
@@ -183,6 +190,7 @@ sub validar_archivos {
 	}
 }
 
+# Valida que si se ingreso la opcion -a se ingresen a continuacion las agencias
 sub validar_agencias {
 	@agencias = @_;
 	if (@agencias > 0 && $agencias[0] eq "") {
@@ -192,6 +200,7 @@ sub validar_agencias {
 	}
 }
 
+# Valida que si se ingreso la opcion -b se ingresen a continuacion los beneficios
 sub validar_beneficios {
 	@beneficios = @_;
 	if (@beneficios > 0 && $beneficios[0] eq "") {
@@ -201,12 +210,13 @@ sub validar_beneficios {
 	}
 }
 
+# Valida que si se ingreso la opcion -e se ingrese alguno de los estados posibles (a,p,r).
 sub validar_estados {
 	@estados = @_;
 	if (@estados > 0) {
 		if ($estados[0] eq "") {
 			print "Debe ingresar los estados junto con la opcion -e. Para todos los estados no ingrese dicha opcion. ";
-			print "Los estados posibles son \"a\" (aceptados), \"p\" (pendientes) y \"r\" (rechazados).\n";
+			print "Los estados posibles son \"a\" (aprobados), \"p\" (pendientes) y \"r\" (rechazados).\n";
 			mostrar_mensaje_ayuda();
 			exit 1;
 		}else{
@@ -214,7 +224,7 @@ sub validar_estados {
 			foreach my $estado (@estados) {
 				$estado = trim($estado);
 				if (lc $estado ne "a" && lc $estado ne "p" && lc $estado ne "r") {
-					print "Los estados posibles son \"a\" (aceptados), \"p\" (pendientes) y \"r\" (rechazados).\n";
+					print "Los estados posibles son \"a\" (aprobados), \"p\" (pendientes) y \"r\" (rechazados).\n";
 					mostrar_mensaje_ayuda();
 					exit 1;
 				}
@@ -227,17 +237,14 @@ sub mostrar_mensaje_ayuda {
 	print "Para ver la ayuda ejecute el comando con la opcion -h.\n";
 }
 
+# Setea el tipo de salida (por pantalla, por archivo o ambas)
 sub setear_salida {
 	my ($salida_pantalla, $salida_archivo) = @_;
 
-	if ($salida_pantalla || !$salida_archivo) {
-		system "clear";
-	}
-
 	if ($salida_archivo) {
-		my $LISTDIR;
-		my $SECUENCIA_LISTADOS;
 
+		# Leo la variable de entorno LISTDIR
+		my $LISTDIR;
 		if ($ENV{"LISTDIR"}) {
 			$LISTDIR = $ENV{"LISTDIR"};
 		}else{
@@ -245,22 +252,44 @@ sub setear_salida {
 			exit 1;
 		}
 
-		if ($ENV{"SECUENCIA_LISTADOS"}) {
-			$SECUENCIA_LISTADOS = $ENV{"SECUENCIA_LISTADOS"};
-		}else{
-			print "No se encuentra seteada la variable de entorno \"SECUENCIA_LISTADOS\". Debe ejecutar \"postini\" previamente para poder usar \"plist\".\n";
+		# Leo del archivo de configuracion la variable SECUENCIA_LISTADOS a traves del script service_instula_conf.sh
+		my $SECUENCIA_LISTADOS = `./service_instula_conf.sh SECUENCIA_LISTADOS`;
+		my $codigo_retorno = `echo $?`;
+		if ($codigo_retorno != 0) {
+			print "Ocurrio un error al ejecutar \"service_instula_conf.sh\".\n";
 			exit 1;
 		}
-		$SECUENCIA_LISTADOS++;
+
+		# Incremento SECUENCIA_LISTADOS en caso de que exista
+		chomp $SECUENCIA_LISTADOS;
+		if ($SECUENCIA_LISTADOS ne "") {
+			$SECUENCIA_LISTADOS++;
+		}else{
+			$SECUENCIA_LISTADOS = 0;
+		}
+
 		my $archivo_salida = "$LISTDIR/plist.$SECUENCIA_LISTADOS";
 		if ($salida_pantalla) {
 			open(STDOUT, "| tee -i $archivo_salida");
 		} else {
 			open(STDOUT, ">", $archivo_salida);
 		}
+
+		# Actualizo SECUENCIA_LISTADOS en el archivo de configuracion
+		$SECUENCIA_LISTADOS = `./service_instula_conf.sh SECUENCIA_LISTADOS $SECUENCIA_LISTADOS`;
+		$codigo_retorno = `echo $?`;
+		if ($codigo_retorno != 0) {
+			print "Ocurrio un error al ejecutar \"service_instula_conf.sh\".\n";
+			exit 1;
+		}
+	}
+
+	if ($salida_pantalla || !$salida_archivo) {
+		system "clear";
 	}
 }
 
+# Imprime una linea divisoria con el caracter pasado por parametro (por default utiliza "-")
 sub imprimir_linea_divisoria {
 	my $caracter = shift;
 	$caracter = "-" unless $caracter;
@@ -271,6 +300,7 @@ sub imprimir_linea_divisoria {
 	print $linea_divisoria."\n";
 }
 
+# Muestra el encabezado del comando plist
 sub mostrar_encabezado {
 	$parametros = shift;
 	my $fecha = `date`;
@@ -283,6 +313,7 @@ sub mostrar_encabezado {
 	print "Parametros: $parametros\n";
 }
 
+# Filtra por las agencias que se ingresaron por linea de comandos
 sub coincide_agencia {
 	my ($agencia, @agencias) = @_;
 	if (@agencias > 0 && $agencias[0] ne "") {
@@ -291,6 +322,7 @@ sub coincide_agencia {
 	return 1;
 }
 
+# Filtra por los beneficios que se ingresaron por linea de comandos
 sub coincide_beneficio {
 	my ($beneficio, @beneficios) = @_;
 	if (@beneficios > 0 && $beneficios[0] ne "") {
@@ -299,6 +331,7 @@ sub coincide_beneficio {
 	return 1;
 }
 
+# Chequea la existencia de un string en un arreglo de strings
 sub arreglo_contiene_elemento {
 	my ($elemento, @arreglo) = @_;
 	foreach my $i (@arreglo) {
@@ -307,13 +340,14 @@ sub arreglo_contiene_elemento {
 	return 0;
 }
 
+# Filtra por los estados que se ingresaron por linea de comandos
 sub coincide_estado {
 	my ($estado, @estados) = @_;
 	if (@estados > 0) {
 		$estado = trim($estado);
 		for (my $i = 0 ; $i < @estados ; $i++) {
 			$estados[$i] = trim($estados[$i]);
-			return 1 if (lc $estado eq "aceptado" && lc $estados[$i] eq "a");
+			return 1 if (lc $estado eq "aprobado" && lc $estados[$i] eq "a");
 			return 1 if (lc $estado eq "pendiente" && lc $estados[$i] eq "p");
 			return 1 if (lc $estado eq "rechazado" && lc $estados[$i] eq "r");
 		}
@@ -322,6 +356,7 @@ sub coincide_estado {
 	return 1;
 }
 
+# Formatea cantidades enteras alineando a la derecha y rellenando con espacios por izquierda
 sub formatear_cantidad {
 	(my $cantidad) = @_;
 	if ($cantidad <= 9999) {
@@ -331,6 +366,7 @@ sub formatear_cantidad {
 	return $cantidad;
 }
 
+# Borra espacios adelante y al final de un string
 sub trim {
 	my $string = shift;
 	$string =~ s/^\s+//;
@@ -338,6 +374,7 @@ sub trim {
 	return $string;
 }
 
+# Muestra la ayuda por pantalla en caso de ejecutarse con la opcion -h
 sub imprimir_ayuda {
 	print "Modo de empleo: plist [OPCIONES]... [ARCHIVOS]...\n";
 	print "Imprime el listado de beneficiarios nuevos de uno o varios ARCHIVOS pasados por parámetro.\n\n";
@@ -347,7 +384,7 @@ sub imprimir_ayuda {
 	print "  -c              Muestra matriz de control por Provincia/Beneficio.\n";
 	print "  -a [AGENCIA]    Filtra los beneficiarios por AGENCIA.\n";
 	print "  -b [BENEFICIO]  Filtra los beneficiarios por BENEFICIO.\n";
-	print "  -e [ESTADO]     Filtra los beneficiarios por ESTADO. Los estados posibles son a (aceptado), p (pendiente), r (rechazado).\n";
+	print "  -e [ESTADO]     Filtra los beneficiarios por ESTADO. Los estados posibles son a (aprobado), p (pendiente), r (rechazado).\n";
 	print "  -h              Muestra esta ayuda.\n\n";
 	print "Para filtrar por más de una agencia, beneficio o estado, ingrese los argumentos separados por comas.\n";
 	print "Ejemplo: plist -a age001,age002 -b bnf01,bnf06 -e a,p -cdt archivo.12*\n";
