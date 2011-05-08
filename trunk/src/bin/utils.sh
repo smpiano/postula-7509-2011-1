@@ -1,11 +1,10 @@
 #!/bin/bash
 log() {
-  # TODO: Reemplazar por la llamada al script logger
   comando=`basename $0`
-  gralog.sh ${comando%.*} "${3:-$comando}" "${2:-A}" "$1"
   if [ -n "$VERBOSE" ]; then
-    echo $1 >&2
+    echo "-- $1" >&2
   fi
+  gralog.sh "${comando%.*}" "${3:-$comando}" "${2:-A}" "$1"
 }
 
 info() {
@@ -84,6 +83,5 @@ sumarMeses() {
 }
 
 mover() {
-  # TODO Reemplazar por el script mover
-  mv "$@"
+  mover.sh "$@"
 }

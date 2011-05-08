@@ -8,7 +8,7 @@ PATH=$PATH:$PWD
 DIR_ARRIBOS=${ARRIDIR:-arribos}
 MAESTRO_AGENCIAS=${MAESTRO_AGENCIAS:-$GRUPO/agencias.mae} 
 MAESTRO_BENEFICIOS=${MAESTRO_BENEFICIOS:-$GRUPO/beneficios.mae}
-export LOGDIR="$GRUPO/logs" LOGEXT='log' MAXLOGSIZE=1000
+export LOGDIR="$GRUPO/logs" LOGEXT='log' MAXLOGSIZE=10000000000000
 CAMPOS_NOVEDAD=( CUIL 'Tipo doc' 'Nro doc' Apellido Nombre Domicilio Localidad Provincia 'Código de Beneficio' 'Fecha pedido de Alta' 'Duración pedida' )
 VERBOSE=true
 POSTULA_ENV='s'
@@ -64,7 +64,7 @@ main() {
     info "- Total de beneficiarios nuevos: $cantidad_nuevo"
 
     # Enviar a recibidos
-    mover $archivo_novedades $DIR_PROCESADOS
+    mover $archivo_novedades $DIR_PROCESADOS postular
   done
 
   # presentar estadisticas
