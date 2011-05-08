@@ -67,7 +67,7 @@ else
   LOGDIR="`./service_instula_conf.sh LOGDIR`"		# Directorio para los archivos de log de los comandos
   LOGEXT="`./service_instula_conf.sh LOGEXT`"		# Extension de los archivos de log
   MAXLOGSIZE="`./service_instula_conf.sh MAXLOGSIZE`"	# Tamanio maximo de los archivos de log
-  USERID="`whoami`"			# Usuario de la instalacion
+  USERID="`./service_instula_conf.sh USERID`"			# Usuario de la instalacion
   FECINS="`date +%d/%m/%Y\ %H:%M`"  # Fecha y Hora de inicio de instalacion
   MAESTRO_AGENCIAS="$CONFDIR/agencias.mae"
   MAESTRO_BENEFICIOS="$CONFDIR/beneficios.mae"
@@ -100,13 +100,21 @@ else
   export USERID
   export FECINS
   export PATH
+  export MAESTRO_AGENCIAS
+  export MAESTRO_BENEFICIOS
+  export POSTULA_ENV
+  export POSTONIO_TIEMPO_ESPERA
+  export DATADIR
+  export NUEVOS
+  export RECIBIDOS
+  export RECHAZADOS
 
   # Imprimo variables
   echo "\n Imprimo variables:"
   evariables
 	
   # Verifico si esta postonio levantado
-  postonio=`ps -xc | grep -v grep | grep 'postonio.sh'`
+  postonio=`ps xc | grep -v grep | grep 'postonio.sh'`
 
   if [ -z "$postonio" ]
   then
