@@ -1,21 +1,16 @@
 #!/bin/bash
 
-#Harcodeo de directorios. Luego usar variables de ambiente
-AGENCIASDIR='/home/ngonzalez/Escritorio/postonio/AGENCIAS'
-ARRIBDIR='/home/ngonzalez/Escritorio/postonio/ARRIBDIR/'
-INBOX='/home/ngonzalez/Escritorio/postonio/RECIBIDOS/'
+source utils.sh
+
 AGENCY_SEQUENCES='/home/ngonzalez/Escritorio/postonio/testing2.txt'
 
-
-
-#Pasar funciones auxiliares a otro archivo
 #===============================================F U N C I O N E S  A U X I L I A R E S ==================================================================#
 
 #Verifica si el Deamon ya esta corriendo
 function anotherPostonioCheck() {
     q=`ps -ef |grep $0 |grep -v "grep"|grep -v $$| wc -l`
     if [ $q != "0" ]; then
-        echo "Postonio already running..."
+        log "Postonio already running..."
         exit 1
     fi
 }
@@ -45,18 +40,18 @@ function isInAgencyMasterFile(){
 	local IFS=","
 	local found='false'
 
-	echo "[POSTONIO] Buscando el codigo de agencia '$agency_code' en el archivo maestro de agencias"
+	info  "Buscando el codigo de agencia '$agency_code' en el archivo maestro de agencias"
 	
-	exec < $AGENCIASDIR/agencias2.mae
+	exec < $DATADIR/agencias2.mae
 	while read LINE  
 	do
-		echo "[POSTONIO] Buscando en la linea; '$LINE' "
+		info "Buscando en la linea; '$LINE' "
 		bar=( $LINE )
-		echo "[POSTONIO] Chequeando Codigo de agencia = ${bar[1]}"
+		info "Chequeando Codigo de agencia = ${bar[1]}"
 		
 		if [ $agency_code == ${bar[1]} ]
 		then
-			echo "[POSTONIO] Codigo de Agencia encontrado !"			
+			info "Codigo de Agencia encontrado !"			
 			found='true'
 			#Cortar el ciclo!
 		fi
@@ -75,8 +70,6 @@ function validAgencyCode() {
 
 	isInAgencyMasterFile $agency_code result_is_in_agency_master_file  
 	
-	echo "[POSTONIO] isInAgencyMasterFile: resultado = $result_is_in_agency_master_file  "
-
 	eval $__result="'$result_is_in_agency_master_file'"
 }
 #======================================================================================#
@@ -95,7 +88,7 @@ function buscarMayorSecuenciaPorCodigoDeAgencia(){
 	resultado_contador=$(echo "$resultado" | wc -l)
 	
 	if [ $resultado_contador -gt 1 ]; then
-		echo "Error de consistencia de datos en el archivo de secuencias"
+		error "Error de consistencia de datos en el archivo de secuencias"
 		exit 1
 	fi
 
@@ -124,8 +117,8 @@ function validSequence(){
 	fi
 	
 	if [ $_sequence -le $secuencia ];then
-		echo "[POSTONIO] Error, el numero de secuencia de la agencia a insertar no es incremental."
-		echo "Se quizo insertar '$_sequence' y el mayor numero de secuencia asociado al codigo de agencia :'$_agency_code' es '$secuencia'"
+		error "El numero de secuencia de la agencia a insertar no es incremental."
+		error "Se quizo insertar '$_sequence' y el mayor numero de secuencia asociado al codigo de agencia :'$_agency_code' es '$secuencia'"
 		eval $_resultSequenceFunction='false'
 	fi
 
@@ -145,16 +138,20 @@ function actualizar_archivo_secuencias(){
 	linea_a_insertar="$__codigo_agencia"."$__secuencia"
 	
 	archivo_modificado=$(cat $AGENCY_SEQUENCES | sed "s/^$__codigo_agencia\.[0-9]\{6\}$/$linea_a_insertar/")
-	
+
 	> $AGENCY_SEQUENCES
-	for  i in $archivo_modificado 
+	for i in $archivo_modificado 
 	do
 		echo "$i">>$AGENCY_SEQUENCES
 	done		
 }
 #======================================================================================#
 function executePosultar(){
-	
+  
+  postular.sh &   
+  
+  $!
+  
 }
 
 #============================================== F I N   F U N C I O N E S  A U X I L I A R E S ============================================================#
@@ -165,23 +162,23 @@ function execute() {
 	
 	if [ -a $AGENCY_SEQUENCES ] 
 	then
-	  echo "Se empleara el archivo '$AGENCY_SEQUENCES' para almacenar las secuencias entrantes y realizar las validaciones pertinentes"
+	  info "Se empleara el archivo '$AGENCY_SEQUENCES' para almacenar las secuencias entrantes y realizar las validaciones pertinentes"
 	else
-		echo "Creando el archivo '$AGENCY_SEQUENCES'"
+		info "Creando el archivo '$AGENCY_SEQUENCES'"
 		> $AGENCY_SEQUENCES
 	fi
 
 
-	if [ ! -d $ARRIBDIR ] 
+	if [ ! -d $ARRIDIR ] 
 	then
-		#Esto deberia salir en el log?
-		echo "[POSTONIO] El directorio de arribos no fue aun creado o es invalido"
+		 error_severo "El directorio de arribos no fue aun creado o es invalido"
+     exit 1
 	fi
 
-	echo "[POSTONIO] Buscando archivos en la carpeta '$ARRIBDIR'"
+	info "Buscando archivos en la carpeta '$ARRIDIR'"
 
 
-	cd $ARRIBDIR
+	cd $ARRIDIR
 
 	#Recorro todos los archivos dentro del directorio de arribos en busca de archivos con nombres validos
 	for FILE in *.*
@@ -190,12 +187,12 @@ function execute() {
 	
 		if [ -z $FILTERED_FILE_NAME ]
 		then
-			echo "[POSTONIO] La estructura del nombre del archivo: '$FILE' es invalida."
-			echo "[POSTONIO] Se moverá a la carpeta de rechazados"
-			#Mover a la carpeta de rechazados
+			info "La estructura del nombre del archivo: '$FILE' es invalida."
+			info "Se moverá a la carpeta de rechazados"
+          move $FILE $RECHAZADOS          
 		else
-			echo "[POSTONIO] La estructura del nombre del archivo: '$FILE' es valida"				
-			echo "[POSTONIO] Validando el codigo de agencia"
+			info "La estructura del nombre del archivo: '$FILE' es valida"				
+			info "Validando el codigo de agencia"
 		
 			codigo_agencia=$(echo $FILE | cut -d'.' -f1)
 			sequence=$(echo $FILE | cut -d'.' -f2)
@@ -206,29 +203,39 @@ function execute() {
 			#Actualiza el archivo de secuencias			
 			if [ $resultSequenceFunction == 'true' ];then
 				actualizar_archivo_secuencias $codigo_agencia $sequence
-				echo "[POSTONIO] La secuencia del codigo de agencia '$codigo_agencia' fue actualizada correctamente"
+				info "La secuencia del codigo de agencia '$codigo_agencia' fue actualizada correctamente"
 			else
-				echo "[POSTONIO] La secuencia '$sequence' fue considerada invalida (ver detalle log)"
-				echo "[POSTONIO] Se moverá el archivo '$codigo_agencia' a la carpeta de rechazados"
-				#Mover a la carpeta de rechazados										
+				error "La secuencia '$sequence' fue considerada invalida (ver detalle log)"
+				error "Se moverá el archivo '$codigo_agencia' a la carpeta de rechazados"
+				mover $FILE $RECHAZADOS 										
 				exit 1
 			fi
 
 			
 			if [ $resultAgencyFunction == 'true' ]		
 			then	
-				echo "[POSTONIO] El codigo de agencia '$codigo_agencia' es valido. (Fue entontrado en el Archivo Maestro de agencias)"
-				echo "[POSTONIO] Se moverá el archivo '$codigo_agencia' a la carpeta de recibidos"									
-				#Mover a la carpeta de recibidos
+				info "El codigo de agencia '$codigo_agencia' es valido. (Fue entontrado en el Archivo Maestro de agencias)"
+				info "Se moverá el archivo '$codigo_agencia' a la carpeta de recibidos"									
+				mover $FILE $RECIBIDOS
 			else
-				echo "[POSTONIO] El codigo de agencia '$codigo_agencia' es inválido.(No fue hayado en el Archivo Maestro de agencias)"
-				echo "[POSTONIO] Se moverá el archivo '$codigo_agencia' a la carpeta de rechazados"						
+				info "El codigo de agencia '$codigo_agencia' es inválido.(No fue hayado en el Archivo Maestro de agencias)"
+				info "Se moverá el archivo '$codigo_agencia' a la carpeta de rechazados"						
 				exit 1
-				#Mover a la carpeta de rechazados
+				mover $FILE $RECHAZADOS
 			fi
-			
-				#llamar al postular
-				executePosultar
+	      
+        #Chequea si estan dadas las condiciones para que se invoque el Postular  
+        if [ `ls $RECIBIDOS | wc -l` -ne 0 ];then
+				    
+            if [ ps -axo 'pid=,command=' | grep postular.sh | cut -f1 | wc -l ];then
+              executePosultar
+            else
+              info "Postular ya se encuentra ejecutando"
+            fi
+        
+        else
+          info "No se recibieron nuevos archivos"
+        fi
 			
 		fi
 
@@ -240,8 +247,7 @@ function main() {
     {
         while [ 1 ]; do
             execute
-#Sacar el tiempo a una variable de entorno
-            sleep 30
+            sleep $POSTONIO_TIEMPO_ESPERA
         done
     } &
 }
@@ -258,4 +264,5 @@ case $1 in
      ;;
 esac
 #=======================================================================================================================================================#
+
 
