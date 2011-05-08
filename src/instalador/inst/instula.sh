@@ -70,26 +70,27 @@ postulaInstalado () {
 	loguear "*            Copyright TPSistemasOp (c)2011            *"
 	loguear "********************************************************"
 	loguear "* Se encuentran instalados los siguientes componentes: *"
-	loguear "* POSTINI  <$2> <$1>\t\t\t*"
-	loguear "* POSTONIO <$3> <$1>\t\t\t*"
-	loguear "* POSTULAR <$4> <$1>\t\t\t*"
-	loguear "* POSTLIST <$5> <$1>\t\t\t*"
+	loguear "* POSTINI  <$2> <$1>\t*"
+	loguear "* POSTONIO <$3> <$1>\t*"
+	loguear "* POSTULAR <$4> <$1>\t*"
+	loguear "* POSTLIST <$5> <$1>\t*"
 	loguear "********************************************************"
 	procesoCancelado
 	fin
 }
 
+# Valida si los componentes tienen permiso de ejecucion
 existeComponente () {
-	if [ -f "$1" -a -x "$1" ]
+	if [ -x "$1" ]
         then
-                echo "\n* <"$2">\t\t\t\t\t*"
+                echo "\n* <"$2">\t\t\t\t\t\t\t*"
         fi
 }
 
 noExisteComponente () {
-	if [ ! -f "$1" -o ! -x "$1" ]
+	if [ ! -x "$1" ]
         then
-                echo "\n* <"$2">\t\t\t\t\t*"
+                echo "\n* <"$2">\t\t\t\t\t\t\t*"
         fi
 }
 
@@ -108,14 +109,12 @@ postulaIncompleto () {
 	loguear "* Proceso de Instalación del sistema Postulantes             *"
 	loguear "*          Copyright TPSistemasOp (c)2011                    *"
 	loguear "**************************************************************"
-	loguear "* Se encuentran instalados los siguientes componentes:       *"
-	loguear "* <Listar componentes>                                       *"
+	loguear "* Se encuentran instalados los siguientes componentes:\t\t*"
 	loguear "$instalados"
-	loguear "* Falta instalar los siguientes componentes:                 *"
-	loguear "* <Listar componentes>                                       *"
+	loguear "* Falta instalar los siguientes componentes:\t\t\t*"
 	loguear "$no_instalados"
-	loguear "* Elimine los componentes instalados e inténtelo nuevamente. *"
-	loguear "*                                                            *"
+	loguear "* Elimine los componentes instalados e inténtelo nuevamente.\t*"
+	loguear "*\t\t\t\t\t\t\t\t*"
 	loguear "**************************************************************"
 	procesoCancelado
 	fin
@@ -128,16 +127,16 @@ isPostulaInstalado () {
 		# La instacion esta completa si:
 		# - Las variables de entorno estan en instula.conf
 		# - Los componentes existen
-		local user=`$INSTDIR/service_instula_conf.sh USERID`
-		local fecha_postini=`$INSTDIR/service_instula_conf.sh POSTINI`
-	        local fecha_postonio=`$INSTDIR/service_instula_conf.sh POSTONIO`
-        	local fecha_postular=`$INSTDIR/service_instula_conf.sh POSTULAR`
-	        local fecha_postlist=`$INSTDIR/service_instula_conf.sh POSTLIST`
+		local user="`$INSTDIR/service_instula_conf.sh USERID`"
+		local fecha_postini="`$INSTDIR/service_instula_conf.sh POSTINI`"
+	        local fecha_postonio="`$INSTDIR/service_instula_conf.sh POSTONIO`"
+        	local fecha_postular="`$INSTDIR/service_instula_conf.sh POSTULAR`"
+	        local fecha_postlist="`$INSTDIR/service_instula_conf.sh POSTLIST`"
 		local componente_postini="$INSTDIR/postini.sh"
 		local componente_postonio="$INSTDIR/postonio.sh"
 		local componente_postular="$INSTDIR/postular.sh"
 		local componente_postlist="$INSTDIR/plist.pl"
-		if [ ! -z "$user" -a ! -z "$fecha_postini" -a ! -z "$fecha_postonio" -a ! -z "$fecha_postular" -a ! -z "$fecha_postlist" -a -f "$componente_postini" -a -f "$componente_postonio" -a -f "$componente_postular" -a -f "$componente_postlist" ]
+		if [ ! -z "$user" -a ! -z "$fecha_postini" -a ! -z "$fecha_postonio" -a ! -z "$fecha_postular" -a ! -z "$fecha_postlist" -a -x "$componente_postini" -a -x "$componente_postonio" -a -x "$componente_postular" -a -x "$componente_postlist" ]
 		then
 			#Paso 2.1
 			postulaInstalado "$user" "$fecha_postini" "$fecha_postonio" "$fecha_postular" "$fecha_postlist";
@@ -407,6 +406,7 @@ instalar () {
 	loguear "Moviendo archivos"
 	local postini="$TARDIR/postini.sh"
 	local service_instula_conf="$TARDIR/service_instula_conf.sh"
+	local gralog="$TARDIR/gralog.sh"
 	local postonio="$TARDIR/postonio.sh"
 	local postular="$TARDIR/postular.sh"
 	local postlist="$TARDIR/plist.pl"
@@ -414,7 +414,7 @@ instalar () {
 	# TODO mover los archivos del paquete postula
 	#copiar ademas service_instula_conf.sh
 
-	if [ ! -f "$postini" -o ! -f "$service_instula_conf" -o ! -f "$postonio" -o ! -f "$postular" -o ! -f "$postlist" ]
+	if [ ! -f "$postini" -o ! -f "$service_instula_conf" -o ! -f "$postonio" -o ! -f "$postular" -o ! -f "$postlist" -o ! -f "$gralog" ]
 	then
 		loguear "Falta uno de los componentes, para poder continuar con la instalacion"
 		procesoCancelado
@@ -422,6 +422,7 @@ instalar () {
 		exit 1
 	fi
 	cp "$service_instula_conf" "$INSTDIR"
+	cp "$gralog" "$INSTDIR"
 	cp "$postini" "$INSTDIR"
 	POSTINI=`date "+%d-%m-%Y %H:%M.%N"`
 	loguear "Instalación del componente POSTINI completada"
@@ -472,11 +473,11 @@ borrarArchivosTemporarios () {
 ########## PASO 18 : MOSTRAR MENSAJE INDICANDO QUE FUE LO QUE SE INSTALO ########## 
 mostrarMensajesInstalacion(){
 	loguear "*************************************************************"
-	loguear "* Se encuentran instalados los siguientes componentes:\t\t\t\t\t\t*"
-	loguear "* POSTINI  <$POSTINI>    "$USERID"\t\t\t\t\t\t*"
-	loguear "* POSTONIO <$POSTONIO> "$USERID"\t\t\t\t\t\t*"
-	loguear "* POSTLIST <$POSTLIST> "$USERID"\t\t\t\t\t\t*"
-	loguear "* POSTULAR <$POSTULAR> "$USERID"\t\t\t\t\t\t*"
+	loguear "* Se encuentran instalados los siguientes componentes:\t\t*"
+	loguear "* POSTINI  <$POSTINI> <$USERID>\t\t*"
+	loguear "* POSTONIO <$POSTONIO> <$USERID>\t\t*"
+	loguear "* POSTLIST <$POSTLIST> <$USERID>\t\t*"
+	loguear "* POSTULAR <$POSTULAR> <$USERID>\t\t*"
 	loguear "**************************************************************"
 	loguear "* FIN del Proceso de Instalación de Postulantes              *"
 	loguear "*          Copyright TPSistemasOp (c)2011                    *"

@@ -1,5 +1,6 @@
 #!/bin/bash
-
+CURRDIR=$PWD
+cd "`dirname $0`"
 # Funcion que imprime el valor de las variables
 evariables () {
 	echo "CURRDIR=$CURRDIR";
@@ -49,7 +50,7 @@ echo "...::: POSTINI :::..."
 
 
 # Comando que verifica la existencia de las variables de inicializacion de ambiente
-CHECK=`echo $PATH | grep 'grupo02'`
+CHECK="`echo $PATH | grep 'grupo02'`"
 
 if [ ! -z "$CHECK"  ]
 then
@@ -60,17 +61,17 @@ then
 else
 
 	# Seteo las variables de entorno para la sesion del usuario (la idea seria que me lleguen como parametro)
-	CURRDIR="$PWD"					# Directorio Actual de trabajo 
-	GRUPO=`./service_instula.sh GRUPO`		# Directorio del grupo
-	ARRIDIR=`./service_instula.sh ARRIDIR`		# Directorio de arribos de archivos externos 
-	BINDIR=`./service_instula.sh BINDIR`		# Directorio para los ejecutables
-	CONFDIR=`./service_instula.sh CONFDIR`		# Directorio para los archivos de configuracion
-	DATASIZE=`./service_instula.sh DATASIZE`	# Espacio minimo necesario en el directorio ARRIDIR en Mb
-	LOGDIR=`./service_instula.sh LOGDIR`		# Directorio para los archivos de log de los comandos
-	LOGEXT=`./service_instula.sh LOGEXT`		# Extension de los archivos de log
-	MAXLOGSIZE=`./service_instula.sh MAXLOGSIZE`	# Tamanio maximo de los archivos de log
-	USERID=`whoami`			# Usuario de la instalacion
-	FECINS=`date +%d/%m/%Y\ %H:%M`  # Fecha y Hora de inicio de instalacion
+	#CURRDIR="$PWD"					# Directorio Actual de trabajo 
+	GRUPO="`./service_instula_conf.sh CURRDIR`"		# Directorio del grupo
+	ARRIDIR="`./service_instula_conf.sh ARRIDIR`"		# Directorio de arribos de archivos externos 
+	BINDIR="`./service_instula_conf.sh BINDIR`"		# Directorio para los ejecutables
+	CONFDIR="`./service_instula_conf.sh CONFDIR`"		# Directorio para los archivos de configuracion
+	DATASIZE="`./service_instula_conf.sh DATASIZE`"	# Espacio minimo necesario en el directorio ARRIDIR en Mb
+	LOGDIR="`./service_instula_conf.sh LOGDIR`"		# Directorio para los archivos de log de los comandos
+	LOGEXT="`./service_instula_conf.sh LOGEXT`"		# Extension de los archivos de log
+	MAXLOGSIZE="`./service_instula_conf.sh MAXLOGSIZE`"	# Tamanio maximo de los archivos de log
+	USERID="`whoami`"			# Usuario de la instalacion
+	FECINS="`date +%d/%m/%Y\ %H:%M`"  # Fecha y Hora de inicio de instalacion
 
 	# Valido la existencia
 	#exist $GRUPO
@@ -80,10 +81,10 @@ else
 	#exist $LOGDIR
 
 	# Seteo la variable PATH
-	PATH=$PATH:$GRUPO:$ARRIDIR:$CONFDIR:$BINDIR
+	PATH="$PATH:$GRUPO:$ARRIDIR:$CONFDIR:$BINDIR"
 
 	# Exporto las variables
-	export CURRDIR
+	#export CURRDIR
 	export GRUPO
 	export ARRIDIR
 	export BINDIR
@@ -120,3 +121,4 @@ else
 	fi
 
 fi
+cd "$CURRDIR"
