@@ -227,7 +227,7 @@ function execute() {
         #Chequea si estan dadas las condiciones para que se invoque el Postular  
         if [ `ls $RECIBIDOS | wc -l` -ne 0 ];then
 				    
-            if [ ps -axo 'pid=,command=' | grep postular.sh | cut -f1 | wc -l ];then
+            if [ ps axo 'pid=,command=' | grep postular.sh | cut -f1 | wc -l ];then
               executePosultar
             else
               info "Postular ya se encuentra ejecutando"
