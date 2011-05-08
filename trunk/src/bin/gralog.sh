@@ -93,35 +93,34 @@ fi #[ $# != 4 ]
 #Obtengo parámetros
 
 #Nombre archivo
-nombre_archivo=$1
+nombre_archivo="$1"
 
 #Nombre del comando
-nombre_comando=$2
+nombre_comando="$2"
 
 #Tipo de mensaje
-tipo=`echo $3 | tr "[:lower:]" "[:upper:]"`
+tipo="`echo $3 | tr "[:lower:]" "[:upper:]"`"
 if [ "$tipo" = "I" -o "$tipo" = "A" -o "$tipo" = "E" -o "$tipo" = "ES" ]
 then
-	tipo_mensaje=$tipo
+	tipo_mensaje="$tipo"
 else
 	echo "Parámetro 3 inválido"
 	exit 1
 fi #[ $tipo = "I" -o $tipo = "A" -o $tipo = "E" -o $tipo = "ES" ]
 
 #Mensaje
-mensaje=$4
+mensaje="$4"
 
-#TODO: Modificar el contenido de estas variables usando las variables de entorno
-directorio_grupo=$CURRDIR #Obtengo el directorio en el que debo posicionarme para ejecutar los comandos
-directorio_logs=$LOGDIR #Obtengo el directorio en donde se almacenan los logs
-extension_arch_log=$LOGEXT #Obtengo la extensión del archivo de log (sin .)
-max_size_log=$MAXLOGSIZE #Obtengo el máximo tamaño que puede ocupar un archivo de log
+directorio_grupo="$CURRDIR" #Obtengo el directorio en el que debo posicionarme para ejecutar los comandos
+directorio_logs="$LOGDIR" #Obtengo el directorio en donde se almacenan los logs
+extension_arch_log="$LOGEXT" #Obtengo la extensión del archivo de log (sin .)
+max_size_log="$MAXLOGSIZE" #Obtengo el máximo tamaño que puede ocupar un archivo de log
 
 #Verifico si existe el directorio de los archivos de log
-if [ ! -d $directorio_logs ]
+if [ ! -d "$directorio_logs" ]
 then
 	#Creo el directorio
-	mkdir $directorio_logs
+	mkdir "$directorio_logs"
 
 	#Creo el archivo de log
 	>"$directorio_logs/$nombre_archivo.$extension_arch_log"
