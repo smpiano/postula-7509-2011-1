@@ -3,35 +3,35 @@
 ################################### GRALOG ###################################
 #                                                                            #
 # Parámetros:                                                                #
-# 	(comando, tipo_mensaje, nombre_comando, mensaje)                     #
+# 	(comando, TIPO_MENSAJE, NOMBRE_COMANDO, MENSAJE)                     #
 # 	                                                                     #
-# comando: nombre del archivo de log en el que se va a almacenar el mensaje  #
-# nombre_comando: Nombre del comado que genera el mensaje                    #
-# tipo_mensaje: I = INFO; A = ALERTA; E = ERROR; ES = ERROR SEVERO           #
-# mensaje: Mensaje a guardar en el archivo de log.	                     #
+# comando: nombre del archivo de log en el que se va a almacenar el MENSAJE  #
+# NOMBRE_COMANDO: Nombre del comado que genera el MENSAJE                    #
+# TIPO_MENSAJE: I = INFO; A = ALERTA; E = ERROR; ES = ERROR SEVERO           #
+# MENSAJE: Mensaje a guardar en el archivo de log.	                     #
 #                                                                            #
 ############################################################################## 
 
 
 #Función que verifica si el archivo supera el tamaño máximo
-verificar_archivo_excede_logsize (){
+verificarSiArchivoExcedeLogsize (){
 
 	arch_log=""
 
 	#Almaceno los nombres de los archivos del directorio de logs en un archivo temporal
-	ls -1 $directorio_logs > "$directorio_logs/nombres_archivos.tmp"
+	ls -1 $DIRECTORIO_LOGS > "$DIRECTORIO_LOGS/nombres_archivos.tmp"
 
-	arch_log=`grep "$nombre_archivo.$extension_arch_log" "$directorio_logs/nombres_archivos.tmp"`
+	arch_log=`grep "$NOMBRE_ARCHIVO.$EXTENSION_ARCH_LOG" "$DIRECTORIO_LOGS/nombres_archivos.tmp"`
 
-	if [ "$arch_log"="$nombre_archivo.$extension_arch_log" ]
+	if [ "$arch_log"="$NOMBRE_ARCHIVO.$EXTENSION_ARCH_LOG" ]
 	then
-		cd $directorio_logs
+		cd $DIRECTORIO_LOGS
 		cant_bytes=`wc -c $arch_log | cut -d' ' -f1` #Tomo la cantidad de bytes que ocupa
 
-		if [ ${cant_bytes:-0} -ge $max_size_log ]
+		if [ ${cant_bytes:-0} -ge $MAX_SIZE_LOG ]
 		then
 			#Grabo en el log que el tamaño fue excedido
-			echo `date '+%m-%d-%y %T'`" - "$nombre_usuario" - "$nombre_comando" - I - Log excedido">>$directorio_logs/"$nombre_archivo."$extension_arch_log
+			echo `date '+%m-%d-%y %T'`" - "$NOMBRE_USUARIO" - "$NOMBRE_COMANDO" - I - Log excedido">>$DIRECTORIO_LOGS/"$NOMBRE_ARCHIVO."$EXTENSION_ARCH_LOG
 
 			bytes_acum=0
 			mitad_tamanio=0
@@ -41,7 +41,7 @@ verificar_archivo_excede_logsize (){
 			do
 				#Acumulo los bytes que van sumando las líneas del archivo
 				bytes_acum=$(($bytes_acum+`echo $linea_archivo | wc -c`))
-			done < $directorio_logs/"$nombre_archivo."$extension_arch_log
+			done < $DIRECTORIO_LOGS/"$NOMBRE_ARCHIVO."$EXTENSION_ARCH_LOG
 	
 			mitad_tamanio=$(($bytes_acum/2))
 
@@ -57,30 +57,30 @@ verificar_archivo_excede_logsize (){
 					bytes_eliminados=$(($bytes_eliminados+`echo $linea_archivo | wc -c`))
 				else
 					#Escribo la línea que persiste en un archivo temporal "temp.log"
-					echo "$linea_archivo">>"$directorio_logs/temp.log"
+					echo "$linea_archivo">>"$DIRECTORIO_LOGS/temp.log"
 				fi #[ $bytes_eliminados -le $mitad_tamanio ]
-			done < $directorio_logs/"$nombre_archivo."$extension_arch_log
+			done < $DIRECTORIO_LOGS/"$NOMBRE_ARCHIVO."$EXTENSION_ARCH_LOG
 
 
 			#Renombro el archivo temporal "temp.log" para que se llame como lo solicitó el usuario
-			rm $directorio_logs/"$nombre_archivo."$extension_arch_log
-			mv $directorio_logs/"temp.log" $directorio_logs/"$nombre_archivo."$extension_arch_log
+			rm $DIRECTORIO_LOGS/"$NOMBRE_ARCHIVO."$EXTENSION_ARCH_LOG
+			mv $DIRECTORIO_LOGS/"temp.log" $DIRECTORIO_LOGS/"$NOMBRE_ARCHIVO."$EXTENSION_ARCH_LOG
 
-		fi #[ $cant_bytes > $max_size_log]
+		fi #[ $cant_bytes > $MAX_SIZE_LOG]
 	
-	fi #[ "$arch_log" = "gralog."$extension_arch_log ]
+	fi #[ "$arch_log" = "gralog."$EXTENSION_ARCH_LOG ]
 
-	rm "$directorio_logs/nombres_archivos.tmp"
+	rm "$DIRECTORIO_LOGS/nombres_archivos.tmp"
 
 } #Fin verificar_archivo_excede_logsize ()
 
 
 
 #####Flujo principal#####
-nombre_usuario=`whoami`
-nombre_comando=""
-tipo_mensaje="I"
-mensaje=""
+NOMBRE_USUARIO=`whoami`
+NOMBRE_COMANDO=""
+TIPO_MENSAJE="I"
+MENSAJE=""
 
 #Verifico cantidad de parámetros
 if [ $# != 4 ]
@@ -93,67 +93,66 @@ fi #[ $# != 4 ]
 #Obtengo parámetros
 
 #Nombre archivo
-nombre_archivo="$1"
+NOMBRE_ARCHIVO="$1"
 
 #Nombre del comando
-nombre_comando="$2"
+NOMBRE_COMANDO="$2"
 
-#Tipo de mensaje
+#Tipo de MENSAJE
 tipo="`echo $3 | tr "[:lower:]" "[:upper:]"`"
 if [ "$tipo" = "I" -o "$tipo" = "A" -o "$tipo" = "E" -o "$tipo" = "ES" ]
 then
-	tipo_mensaje="$tipo"
+	TIPO_MENSAJE="$tipo"
 else
 	echo "Parámetro 3 inválido"
 	exit 1
 fi #[ $tipo = "I" -o $tipo = "A" -o $tipo = "E" -o $tipo = "ES" ]
 
 #Mensaje
-mensaje="$4"
+MENSAJE="$4"
 
-directorio_grupo="$CURRDIR" #Obtengo el directorio en el que debo posicionarme para ejecutar los comandos
-directorio_logs="$LOGDIR" #Obtengo el directorio en donde se almacenan los logs
-extension_arch_log="$LOGEXT" #Obtengo la extensión del archivo de log (sin .)
-max_size_log="$MAXLOGSIZE" #Obtengo el máximo tamaño que puede ocupar un archivo de log
+DIRECTORIO_GRUPO="$CURRDIR" #Obtengo el directorio en el que debo posicionarme para ejecutar los comandos
+DIRECTORIO_LOGS="$LOGDIR" #Obtengo el directorio en donde se almacenan los logs
+EXTENSION_ARCH_LOG="$LOGEXT" #Obtengo la extensión del archivo de log (sin .)
+MAX_SIZE_LOG="$MAXLOGSIZE" #Obtengo el máximo tamaño que puede ocupar un archivo de log
 
 #Verifico si existe el directorio de los archivos de log
-if [ ! -d "$directorio_logs" ]
+if [ ! -d "$DIRECTORIO_LOGS" ]
 then
 	#Creo el directorio
-	mkdir "$directorio_logs"
+	mkdir "$DIRECTORIO_LOGS"
 
 	#Creo el archivo de log
-	>"$directorio_logs/$nombre_archivo.$extension_arch_log"
+	>"$DIRECTORIO_LOGS/$NOMBRE_ARCHIVO.$EXTENSION_ARCH_LOG"
 
-	#Guardo el mensaje en el log	
-	echo $nombre_archivo.$extension_arch_log" - "`date '+%m-%d-%y %T'`" - "$nombre_usuario" - "$nombre_comando" - "$tipo_mensaje" - "$mensaje>>$directorio_logs/"$nombre_archivo."$extension_arch_log
+	#Guardo el MENSAJE en el log	
+	echo $NOMBRE_ARCHIVO.$EXTENSION_ARCH_LOG" - "`date '+%m-%d-%y %T'`" - "$NOMBRE_USUARIO" - "$NOMBRE_COMANDO" - "$TIPO_MENSAJE" - "$MENSAJE>>$DIRECTORIO_LOGS/"$NOMBRE_ARCHIVO."$EXTENSION_ARCH_LOG
 
-	verificar_archivo_excede_logsize
-
+	verificarSiArchivoExcedeLogsize
 	exit 0
 else
 	#Verifico si existe el archivo de log
-	existe_log=`ls $directorio_logs | grep "$nombre_archivo.$extension_arch_log"`
+	existe_log=`ls $DIRECTORIO_LOGS | grep "$NOMBRE_ARCHIVO.$EXTENSION_ARCH_LOG"`
 	if [ -z $existe_log ]
 	then
 		#Creo el archivo de log
-		>"$directorio_logs/$nombre_archivo.$extension_arch_log"
+		>"$DIRECTORIO_LOGS/$NOMBRE_ARCHIVO.$EXTENSION_ARCH_LOG"
 
-		#Guardo el mensaje en el log
-		echo $nombre_archivo.$extension_arch_log" - "`date '+%m-%d-%y %T'`" - "$nombre_usuario" - "$nombre_comando" - "$tipo_mensaje" - "$mensaje>>$directorio_logs/"$nombre_archivo."$extension_arch_log
+		#Guardo el MENSAJE en el log
+		echo $NOMBRE_ARCHIVO.$EXTENSION_ARCH_LOG" - "`date '+%m-%d-%y %T'`" - "$NOMBRE_USUARIO" - "$NOMBRE_COMANDO" - "$TIPO_MENSAJE" - "$MENSAJE>>$DIRECTORIO_LOGS/"$NOMBRE_ARCHIVO."$EXTENSION_ARCH_LOG
 
-		verificar_archivo_excede_logsize
+		verificarSiArchivoExcedeLogsize
 
 		exit 0
 	else
-		#Guardo el mensaje en el log
-		echo $nombre_archivo.$extension_arch_log" - "`date '+%m-%d-%y %T'`" - "$nombre_usuario" - "$nombre_comando" - "$tipo_mensaje" - "$mensaje>>$directorio_logs/"$nombre_archivo."$extension_arch_log
+		#Guardo el MENSAJE en el log
+		echo $NOMBRE_ARCHIVO.$EXTENSION_ARCH_LOG" - "`date '+%m-%d-%y %T'`" - "$NOMBRE_USUARIO" - "$NOMBRE_COMANDO" - "$TIPO_MENSAJE" - "$MENSAJE>>$DIRECTORIO_LOGS/"$NOMBRE_ARCHIVO."$EXTENSION_ARCH_LOG
 
-		verificar_archivo_excede_logsize
+		verificarSiArchivoExcedeLogsize
 
 		exit 0
 
 	fi #[ -z $existe_log ]
-fi #[ ! -d $directorio_logs ]
+fi #[ ! -d $DIRECTORIO_LOGS ]
 
 
