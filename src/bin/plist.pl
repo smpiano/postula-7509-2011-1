@@ -1,20 +1,17 @@
 #!/usr/bin/perl
 #use strict;
 #use warnings;
-use Getopt::Long;
+use Getopt::Long qw(:config bundling);
 
 ########## Cuerpo Principal ###########
 
-#my %args;
-#getopts("cde:t",\%args);
-
 my @agencias;
 my @beneficios;
-my @archivos;
 my @estados;
 my $genera_matriz;
 my $salida_archivo;
 my $salida_pantalla;
+my $imprime_ayuda;
 
 my $parametros;
 my $i = 0;
@@ -23,17 +20,25 @@ while ($i < @ARGV) {
 	$i++;
 }
 
+
 # Parseo de argumentos
 
 my $resultado = GetOptions(	
-	"a:s{,}" => \@agencias,
-	"b:s{,}" => \@beneficios,
+	"a:s" => \@agencias,
+	"b:s" => \@beneficios,
 	"c" => \$genera_matriz,
 	"d" => \$salida_archivo,
-	"e:s{,}" => \@estados,
-	"f:s{,}" => \@archivos,
+	"e:s" => \@estados,
 	"t" => \$salida_pantalla,
+	"h" => \$imprime_ayuda,
 );
+
+my @archivos = @ARGV;
+
+if ($imprime_ayuda) {
+	imprimir_ayuda();
+}
+
 
 # Validacion de los parametros ingresados
 
@@ -41,9 +46,12 @@ validar_archivos(@archivos);
 validar_agencias(@agencias);
 validar_beneficios(@beneficios);
 validar_estados(@estados);
-validar_argumentos(@ARGV);
 setear_salida($salida_pantalla, $salida_archivo);
 mostrar_encabezado($parametros);
+
+
+@agencias = split(/,/,join(',',@agencias));
+@beneficios = split(/,/,join(',',@beneficios));
 
 
 # Generacion del listado de nuevos beneficiarios
@@ -107,7 +115,6 @@ while ($i < @archivos) {
 		# Impresion de la matriz de control por provincia/beneficio
 
 		if ($genera_matriz) {
-			### validar que la matriz entre en la pantalla, sino sale solo por archivo.
 			imprimir_linea_divisoria();
 			print "Matriz de Control por Provincia/Beneficio:\n";
 			imprimir_linea_divisoria();
@@ -120,6 +127,7 @@ while ($i < @archivos) {
 			print $fila0."TOTAL|\n";
 		
 			my %total_por_beneficio;
+
 			# Imprimo por cada provincia la cantidad de beneficiarios de cada beneficio
 			foreach my $provincia (sort keys %matriz_control) {
 
@@ -127,10 +135,11 @@ while ($i < @archivos) {
 				my $total_por_provincia = 0;
 
 				foreach my $beneficio (sort @beneficios_matriz) {
-					my $cantidad_beneficiarios = $matriz_control{$provincia}{$beneficio};
+
+					my $cantidad_beneficiarios = 0;
+					$cantidad_beneficiarios = $matriz_control{$provincia}{$beneficio} unless !$matriz_control{$provincia}{$beneficio};
 					$total_por_beneficio{$beneficio} += $cantidad_beneficiarios;
 					$total_por_provincia += $cantidad_beneficiarios;
-					### validar que la cantidad no sea mayor a 5 cifras.
 					$cantidad_beneficiarios = formatear_cantidad($cantidad_beneficiarios);
 					$fila .= $cantidad_beneficiarios."|";
 				}
@@ -167,8 +176,8 @@ exit 0;
 
 sub validar_archivos {
 	@archivos = @_;
-	if (@archivos == 0 || $archivos[0] eq "") {
-		print "No se encontraron archivos para procesar. Debe ingresar la opcion -f junto con los archivos que desea procesar.\n";
+	if (@archivos == 0) {
+		print "No se encontraron archivos para procesar.\n";
 		mostrar_mensaje_ayuda();
 		exit 1;
 	}
@@ -196,26 +205,21 @@ sub validar_estados {
 	@estados = @_;
 	if (@estados > 0) {
 		if ($estados[0] eq "") {
-			print "Debe ingresar los estados que desea filtrar junto con la opcion -e. Para todos los estados no ingrese dicha opcion. ";
-			print "Los estados posibles son \"a\" (aceptados) y \"p\" (pendientes).\n";
+			print "Debe ingresar los estados junto con la opcion -e. Para todos los estados no ingrese dicha opcion. ";
+			print "Los estados posibles son \"a\" (aceptados), \"p\" (pendientes) y \"r\" (rechazados).\n";
 			mostrar_mensaje_ayuda();
 			exit 1;
 		}else{
-			if (@estados > 2 || $estados[0] ne "a" && $estados[0] ne "p" || @estados == 2 && $estados[1] ne "a" && $estados[1] ne "p") {
-				print "Los estados posibles son \"a\" (aceptados) y \"p\" (pendientes).\n";
-				mostrar_mensaje_ayuda();
-				exit 1;
+			@estados = split(/,/,join(',',@estados));
+			foreach my $estado (@estados) {
+				$estado = trim($estado);
+				if (lc $estado ne "a" && lc $estado ne "p" && lc $estado ne "r") {
+					print "Los estados posibles son \"a\" (aceptados), \"p\" (pendientes) y \"r\" (rechazados).\n";
+					mostrar_mensaje_ayuda();
+					exit 1;
+				}
 			}
 		}
-	}
-}
-
-sub validar_argumentos {
-	my @argumentos = @_;
-	if (@argumentos != 0) {
-		print "Los argumentos ingresados son incorrectos.\n";
-		mostrar_mensaje_ayuda();
-		exit 1;
 	}
 }
 
@@ -298,24 +302,55 @@ sub coincide_beneficio {
 sub arreglo_contiene_elemento {
 	my ($elemento, @arreglo) = @_;
 	foreach my $i (@arreglo) {
-		return 1 if $i eq $elemento;
+		return 1 if lc $i eq lc $elemento;
 	}
 	return 0;
 }
 
 sub coincide_estado {
 	my ($estado, @estados) = @_;
-	if (@estados == 1 && $estados[0] ne "") {
-		return 1 if ($estados[0] eq "a" && $estado eq "aceptado ");
-		return 1 if ($estados[0] eq "p" && $estado eq "pendiente");
+	if (@estados > 0) {
+		$estado = trim($estado);
+		for (my $i = 0 ; $i < @estados ; $i++) {
+			$estados[$i] = trim($estados[$i]);
+			return 1 if (lc $estado eq "aceptado" && lc $estados[$i] eq "a");
+			return 1 if (lc $estado eq "pendiente" && lc $estados[$i] eq "p");
+			return 1 if (lc $estado eq "rechazado" && lc $estados[$i] eq "r");
+		}
 		return 0;
 	}
 	return 1;
 }
 
 sub formatear_cantidad {
-	($cantidad) = @_;
-	$cantidad = sprintf("%5.0f", $cantidad);
-	$cantidad = pack("A5",$cantidad);
+	(my $cantidad) = @_;
+	if ($cantidad <= 9999) {
+		$cantidad = sprintf("%5.0f", $cantidad);
+		$cantidad = pack("A5",$cantidad);
+	}
+	return $cantidad;
+}
+
+sub trim {
+	my $string = shift;
+	$string =~ s/^\s+//;
+	$string =~ s/\s+$//;
+	return $string;
+}
+
+sub imprimir_ayuda {
+	print "Modo de empleo: plist [OPCIONES]... [ARCHIVOS]...\n";
+	print "Imprime el listado de beneficiarios nuevos de uno o varios ARCHIVOS pasados por parámetro.\n\n";
+	print "Opciones disponibles:\n";
+	print "  -t              Salida por pantalla.\n";
+	print "  -d              Salida por archivo.\n";
+	print "  -c              Muestra matriz de control por Provincia/Beneficio.\n";
+	print "  -a [AGENCIA]    Filtra los beneficiarios por AGENCIA.\n";
+	print "  -b [BENEFICIO]  Filtra los beneficiarios por BENEFICIO.\n";
+	print "  -e [ESTADO]     Filtra los beneficiarios por ESTADO. Los estados posibles son a (aceptado), p (pendiente), r (rechazado).\n";
+	print "  -h              Muestra esta ayuda.\n\n";
+	print "Para filtrar por más de una agencia, beneficio o estado, ingrese los argumentos separados por comas.\n";
+	print "Ejemplo: plist -a age001,age002 -b bnf01,bnf06 -e a,p -cdt archivo.12*\n";
+	exit 0;
 }
 
