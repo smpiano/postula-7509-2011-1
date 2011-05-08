@@ -12,78 +12,73 @@ source utils.sh
 # Validacion de cantidad de argumentos:
 if [ $# -lt 2 ]
 then
-	comando_invocante="mover"
-	tipo_mensaje="SE"
-	mensaje="Faltan argumentos. Uso: mover <origen> <destino> [<comando que invoca>]"
-	log "$mensaje" $tipo_mensaje mover
+	TIPO_MENSAJE="SE"
+	MENSAJE="Faltan argumentos. Uso: mover <origen> <destino> [<comando que invoca>]"
+	log "$MENSAJE" $TIPO_MENSAJE mover
 	exit 1
 fi
 
 if [ $# -gt 3 ]
 then
-	comando_invocante="mover"
-	tipo_mensaje="SE"
-	mensaje="Sobran argumentos. Uso: mover <origen> <destino> [<comando que invoca>]"
-	log "$mensaje" $tipo_mensaje mover
+	TIPO_MENSAJE="SE"
+	MENSAJE="Sobran argumentos. Uso: mover <origen> <destino> [<comando que invoca>]"
+	log "$MENSAJE" $TIPO_MENSAJE mover
 	exit 1
 fi
 
 # Validacion de existencia de archivo origen y directorio destino:
 
-origen=$1
-destino=$2
+ORIGEN=$1
+DESTINO=$2
 
-if [ ! -e $origen ]
+if [ ! -e $ORIGEN ]
 then
-	comando_invocante="mover"
-	tipo_mensaje="SE"
-	mensaje="Archivo origen $origen inexistente"
-	log "$mensaje" $tipo_mensaje mover
+	TIPO_MENSAJE="SE"
+	MENSAJE="Archivo origen $ORIGEN inexistente"
+	log "$MENSAJE" $TIPO_MENSAJE mover
 	exit 2
 fi
 
-if [ ! -d $destino ]
+if [ ! -d $DESTINO ]
 then
-	comando_invocante="mover"
-	tipo_mensaje="SE"
-	mensaje="Directorio destino $destino inexistente"
-	log "$mensaje" $tipo_mensaje mover
+	TIPO_MENSAJE="SE"
+	MENSAJE="Directorio destino $ORIGEN inexistente"
+	log "$MENSAJE" $TIPO_MENSAJE mover
 	exit 2
 fi
 
 
-nombre_archivo=`echo "$origen" | sed 's/^.*\/\(.*\)$/\1/'`
-destino="$destino/$nombre_archivo"
+NOMBRE_ARCHIVO=`echo "$ORIGEN" | sed 's/^.*\/\(.*\)$/\1/'`
+DESTINO="$DESTINO/$NOMBRE_ARCHIVO"
 
-if [ -e $destino ] # si el archivo ya existe	
+if [ -e $DESTINO ] # si el archivo ya existe	
 then
-	ruta_duplicado="$2/dup"
+	RUTA_DUPLICADO="$2/dup"
 
-	if [ ! -d $ruta_duplicado ] # si no existe el directorio /dup lo crea
+	if [ ! -d $RUTA_DUPLICADO ] # si no existe el directorio /dup lo crea
 	then
-		mkdir $ruta_duplicado
+		mkdir $RUTA_DUPLICADO
 	fi
 
-	sec=0
-	until [ ! -e $archivo_duplicado ]
+	SEC=0
+	until [ ! -e $ARCHIVO_DUPLICADO ]
 	do
-		let sec=$sec+1
-		archivo_duplicado="$ruta_duplicado/$nombre_archivo.$sec"		
+		let SEC=$SEC+1
+		ARCHIVO_DUPLICADO="$RUTA_DUPLICADO/$NOMBRE_ARCHIVO.$SEC"		
 	done
-	destino=$archivo_duplicado
+	DESTINO=$ARCHIVO_DUPLICADO
 fi
 
-cp $origen $destino
-rm $origen
+cp $ORIGEN $DESTINO
+rm $ORIGEN
 
-comando_invocante="mover"
-tipo_mensaje="I"
-mensaje="Movimiento desde $origen a $destino"
-log "$mensaje" $tipo_mensaje $3
+TIPO_MENSAJE="I"
+MENSAJE="Movimiento desde $ORIGEN a $DESTINO"
+log "$MENSAJE" $TIPO_MENSAJE mover
 
 if [ $# -eq 3 ]
 then
-	comando_invocante="$3"
-	log "$mensaje" $tipo_mensaje $3
+	COMANDO_INVOCANTE="$3"
+	log "$MENSAJE" $TIPO_MENSAJE $COMANDO_INVOCANTE
 fi
 
