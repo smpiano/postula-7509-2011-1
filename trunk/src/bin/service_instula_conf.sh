@@ -16,26 +16,32 @@ NOMBRE=$1
 VALOR=$2
 
 # Indico la posicion del archivo de configuracion
-INSTULA_CONF="$PWD/instula.conf"
+#INSTULA_CONF="$PWD/instula.conf"
+CURR="$PWD"
+SCRIPT_DIR="`dirname $0`"
+cd "$SCRIPT_DIR"
+INSTULA_CONF="../conf/instula.conf"
+
 if [ ! -f "$INSTULA_CONF" ]
 then
-	>>$INSTULA_CONF
+	>>"$INSTULA_CONF"
 fi
 
 # Evaluo que exista el nombre de esa variable
-EXISTE_VARIABLE=`cat $INSTULA_CONF | grep "$NOMBRE"`
+EXISTE_VARIABLE=`cat "$INSTULA_CONF" | grep "$NOMBRE"`
 
 # Si el valor contiene algo significa que quieren hacer un SET
 if [ -z  "$VALOR" ]
 then
-	echo `echo $EXISTE_VARIABLE | cut -f2 -d\=`
+	echo `echo "$EXISTE_VARIABLE" | cut -f2 -d\=`
 else
 	if [ -z "$EXISTE_VARIABLE" ]
 	then
 		# Si no existe la variable la escribo en el archivo
-		echo "$NOMBRE=$VALOR">>$INSTULA_CONF
+		echo "$NOMBRE=$VALOR">>"$INSTULA_CONF"
 	else
 		# Modifico el valor de la variable
-		sed -i "s/$NOMBRE.*/$NOMBRE=$VALOR/" $INSTULA_CONF
+		sed -i "s/$NOMBRE.*/$NOMBRE=$VALOR/" "$INSTULA_CONF"
 	fi
 fi
+cd "$CURR"
