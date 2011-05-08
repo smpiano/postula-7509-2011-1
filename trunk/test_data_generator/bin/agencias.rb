@@ -36,7 +36,8 @@ params[:count].times do |i|
   params[:target_file] << [
     i + 1,
     new_key,
-    Forgery(:lorem_ipsum).sentence(random: true).tr(',','')
+    Forgery(:lorem_ipsum).sentence(random: true).tr(',',''),
+    "##-########-#".to_numbers
   ].join(',')
   params[:target_file] << "\n"
 end

@@ -68,11 +68,14 @@ class RegistryOk
   end
 
   def fecha_pedido_alta(beneficio_seleccionado)
-    optional { Date.today.to_s }
+    optional do
+      duracion_en_dias = beneficio_seleccionado.fin - beneficio_seleccionado.inicio
+      beneficio_seleccionado.inicio + rand(duracion_en_dias)
+    end
   end
 
   def duracion_meses(beneficio_seleccionado)
-    optional { rand(12) }
+    optional { rand(beneficio_seleccionado.duracion_maxima) + 1 }
   end
 
   def pick_beneficio(beneficios)
@@ -184,7 +187,7 @@ Beneficio = Struct.new(:codigo, :inicio, :fin, :duracion_maxima)
 
 beneficios = File.readlines(params[:maestro_beneficios]).map do |beneficio|
   _, codigo, _, inicio, fin, duracion_maxima = beneficio.split(',')
-  Beneficio.new(codigo, inicio, fin, duracion_maxima)
+  Beneficio.new(codigo, Date.parse(inicio), Date.parse(fin), duracion_maxima.to_i)
 end
 
 params[:registros].each do |registro|
