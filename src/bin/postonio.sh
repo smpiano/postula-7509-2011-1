@@ -2,7 +2,7 @@
 
 source utils.sh
 
-AGENCY_SEQUENCES='/home/ngonzalez/Escritorio/postonio/testing2.txt'
+AGENCY_SEQUENCES=$CONFDIR/AGENCY_SEQUENCES.txt
 
 #===============================================F U N C I O N E S  A U X I L I A R E S ==================================================================#
 
