@@ -1,5 +1,6 @@
 #!/bin/bash
-
+ACTUAL="$PWD"
+cd "`dirname $0`"
 # Funcion que imprime el valor de las variables
 evariables () {
   echo "CURRDIR=$CURRDIR";
@@ -13,14 +14,19 @@ evariables () {
   echo "USERID=$USERID";
   echo "FECINS=$FECINS";
   echo "PATH=$PATH";
+  echo "POSTONIO_TIEMPO_ESPERA=$POSTONIO_TIEMPO_ESPERA";
+  echo "DATADIR=$DATADIR"
+  echo "NUEVOS=$NUEVOS";
+  echo "RECIBIDOS=$RECIBIDOS";
+  echo "RECHAZADOS=$RECHAZADOS";
 }
 
 # Funcion que corre POSTONIO
 runPostonio () {
   #Nico tiene que editar aca.
   #./postonio.sh start
-  EXIT=`echo $?`
-  if [ $EXIT != 0 ]
+  local postonio_en_ejecucion="`echo $?`"
+  if [ "$postonio_en_ejecucion" != 0 ]
   then
     echo "Analizar error"
   else
@@ -40,40 +46,37 @@ exist () {
 
 echo "...::: POSTINI :::..."
 
-# Necesidad del pasaje de un parametro
-#if [ $# != 1 ] 
-#then
-#  echo "Se debe pasar un parametro, el nombre del demonio POSTONIO [para test usar: xorg]"
-#  exit 1
-#fi
-
-
 # Comando que verifica la existencia de las variables de inicializacion de ambiente
-CHECK=`echo $PATH | grep 'grupo02'`
+# TODO ver si grupo02 es necesario para poder validar la existencia
+CHECK="`echo $PATH | grep 'grupo02'`"
 
 if [ ! -z "$CHECK"  ]
 then
-  echo "ADVERTENCIA: las variables de entorno ya fueron seteadas"
+  echo "### ADVERTENCIA: las variables de entorno ya fueron seteadas ###"
 
   # Imprimo variables
   evariables
 else
-
   # Seteo las variables de entorno para la sesion del usuario (la idea seria que me lleguen como parametro)
-  CURRDIR="$PWD"                                # Directorio Actual de trabajo 
-  GRUPO=`./service_instula.sh GRUPO`            # Directorio del grupo
-  ARRIDIR=`./service_instula.sh ARRIDIR`        # Directorio de arribos de archivos externos 
-  BINDIR=`./service_instula.sh BINDIR`          # Directorio para los ejecutables
-  CONFDIR=`./service_instula.sh CONFDIR`        # Directorio para los archivos de configuracion
-  DATASIZE=`./service_instula.sh DATASIZE`      # Espacio minimo necesario en el directorio ARRIDIR en Mb
-  LOGDIR=`./service_instula.sh LOGDIR`          # Directorio para los archivos de log de los comandos
-  LOGEXT=`./service_instula.sh LOGEXT`          # Extension de los archivos de log
-  MAXLOGSIZE=`./service_instula.sh MAXLOGSIZE`  # Tamaño máximo de los archivos de log
-  USERID=`whoami`                               # Usuario de la instalacion
-  FECINS=`date +%d/%m/%Y\ %H:%M`                # Fecha y Hora de inicio de instalacion
+  CURRDIR="$PWD"					# Directorio Actual de trabajo 
+  GRUPO="`./service_instula_conf.sh CURRDIR`"		# Directorio del grupo
+  ARRIDIR="`./service_instula_conf.sh ARRIDIR`"		# Directorio de arribos de archivos externos 
+  BINDIR="`./service_instula_conf.sh BINDIR`"		# Directorio para los ejecutables
+  CONFDIR="`./service_instula_conf.sh CONFDIR`"		# Directorio para los archivos de configuracion
+  DATASIZE="`./service_instula_conf.sh DATASIZE`"	# Espacio minimo necesario en el directorio ARRIDIR en Mb
+  LOGDIR="`./service_instula_conf.sh LOGDIR`"		# Directorio para los archivos de log de los comandos
+  LOGEXT="`./service_instula_conf.sh LOGEXT`"		# Extension de los archivos de log
+  MAXLOGSIZE="`./service_instula_conf.sh MAXLOGSIZE`"	# Tamanio maximo de los archivos de log
+  USERID="`whoami`"			# Usuario de la instalacion
+  FECINS="`date +%d/%m/%Y\ %H:%M`"  # Fecha y Hora de inicio de instalacion
   MAESTRO_AGENCIAS="$CONFDIR/agencias.mae"
   MAESTRO_BENEFICIOS="$CONFDIR/beneficios.mae"
   POSTULA_ENV="Loaded"
+  POSTONIO_TIEMPO_ESPERA="`./service_instula_conf.sh POSTONIO_TIEMPO_ESPERA`"
+  DATADIR="`./service_instula_conf.sh DATADIR`"
+  NUEVOS="$GRUPO/nuevos"
+  RECIBIDOS="$GRUPO/recibidos"
+  RECHAZADOS="$GRUPO/rechazados"
 
   # Valido la existencia
   #exist $GRUPO
@@ -83,10 +86,9 @@ else
   #exist $LOGDIR
 
   # Seteo la variable PATH
-  PATH=$PATH:$GRUPO:$ARRIDIR:$CONFDIR:$BINDIR
+  PATH="$PATH:$GRUPO:$BINDIR"
 
   # Exporto las variables
-  export CURRDIR
   export GRUPO
   export ARRIDIR
   export BINDIR
@@ -102,9 +104,9 @@ else
   # Imprimo variables
   echo "\n Imprimo variables:"
   evariables
-
+	
   # Verifico si esta postonio levantado
-  postonio=`ps -ef | grep -v grep | grep 'postonio'`
+  postonio=`ps -xc | grep -v grep | grep 'postonio.sh'`
 
   if [ -z "$postonio" ]
   then
@@ -118,8 +120,9 @@ else
 
     # Imprimo variables
     evariables
-
-    echo "Demonio corriendo bajo el Nro.: $postonio"
+    local pid="`echo "$postonio" | sed 's/ \+/,/g' | cut -f2 -d,`"
+    echo "Demonio corriendo bajo el Nro.: $pid"
   fi
 
 fi
+cd "$ACTUAL"
