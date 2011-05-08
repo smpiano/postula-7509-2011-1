@@ -48,7 +48,7 @@ main() {
 
       # Validar formato registro
       checkFormatoNovedad $archivo_novedades $numero_de_registros "$novedad" 2>> $error_file \
-        || ((cantidad_con_error= cantidad_con_error + 1)) && continue
+        || { ((cantidad_con_error= cantidad_con_error + 1)) && continue; }
 
       # Validar campos
       checkCamposNovedad $archivo_novedades $numero_de_registros "$novedad" \
