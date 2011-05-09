@@ -86,6 +86,5 @@ sumarMeses() {
 }
 
 mover() {
-  info "llamando al mover con $@"
   mover.sh "$@"
 }
