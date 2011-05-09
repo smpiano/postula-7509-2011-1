@@ -45,6 +45,7 @@ function isInAgencyMasterFile(){
 	
   found="true"
   datos_agencia=`buscar_agencia $agency_code`
+  
   if [[ $datos_agencia = '' ]]; then
     found="false"
   fi
@@ -101,10 +102,11 @@ function validSequence(){
 	local _agency_code=$2
 	local _resultSequenceFunction=$3
 
-	buscarMayorSecuenciaPorCodigoDeAgencia $_agency_code secuencia
+  buscarMayorSecuenciaPorCodigoDeAgencia $_agency_code secuencia
 
-	if [ $secuencia == 'null' ];then
-		echo $linea_archivo>>$AGENCY_SEQUENCES
+  if [ $secuencia == 'null' ];then
+    linea_archivo="$_agency_code"."$_sequence"
+    echo $linea_archivo>>$AGENCY_SEQUENCES
 		eval $_resultSequenceFunction='true'
 	elif [ $_sequence -le $secuencia ];then
 		error "El numero de secuencia de la agencia a insertar no es incremental."
@@ -137,8 +139,7 @@ function actualizar_archivo_secuencias(){
 function executePosultar(){
   
   postular.sh &   
-  
-  $!
+  info "Se ejecuto el postular. PID: $!"
   
 }
 
@@ -147,76 +148,80 @@ function executePosultar(){
 
 # Funcion principal del demonio
 function execute() {
-	if [ -a $AGENCY_SEQUENCES ] 
-	then
-	  info "Se empleara el archivo '$AGENCY_SEQUENCES' para almacenar las secuencias entrantes y realizar las validaciones pertinentes"
-	else
-		info "Creando el archivo '$AGENCY_SEQUENCES'"
-		> $AGENCY_SEQUENCES
-	fi
+        if [ -a $AGENCY_SEQUENCES ] 
+        then
+          info "Se empleara el archivo '$AGENCY_SEQUENCES' para almacenar las secuencias entrantes y realizar las validaciones pertinentes"
+        else
+                info "Creando el archivo '$AGENCY_SEQUENCES'"
+                > $AGENCY_SEQUENCES
+        fi
 
 
-	if [ ! -d $ARRIDIR ] 
-	then
-		 error_severo "El directorio de arribos no fue aun creado o es invalido"
-     exit 1
-	fi
-
-	info "Buscando archivos en la carpeta '$ARRIDIR'"
 
 
-	cd $ARRIDIR
+        if [ ! -d $ARRIDIR ] 
+        then
+                 error_severo "El directorio de arribos no fue aun creado o es invalido"
+                 exit 1
+        fi
 
-	#Recorro todos los archivos dentro del directorio de arribos en busca de archivos con nombres validos
-	for FILE in `ls`
-	do
-		FILTERED_FILE_NAME=$(ls $FILE | egrep ^[a-zA-Z0-9]*\.[0-9]{6}$)
-	
-		if [ -z $FILTERED_FILE_NAME ]
-		then
-			info "La estructura del nombre del archivo: '$FILE' es invalida."
-			info "Se moverá a la carpeta de rechazados"
-          mover "$FILE" "$RECHAZADOS"
-		else
-			info "La estructura del nombre del archivo: '$FILE' es valida"				
-			info "Validando el codigo de agencia"
-		
-			codigo_agencia=$(echo $FILE | cut -d'.' -f1)
-			sequence=$(echo $FILE | cut -d'.' -f2)
-		
-			validAgencyCode $codigo_agencia resultAgencyFunction
-			validSequence $sequence $codigo_agencia resultSequenceFunction
-			
-			#Actualiza el archivo de secuencias			
-			if [ $resultSequenceFunction == 'true' ];then
-				actualizar_archivo_secuencias $codigo_agencia $sequence
-				info "La secuencia del codigo de agencia '$codigo_agencia' fue actualizada correctamente"
-			else
-				error "La secuencia '$sequence' fue considerada invalida (ver detalle log)"
-				error "Se moverá el archivo '$codigo_agencia' a la carpeta de rechazados"
-				mover $FILE $RECHAZADOS 										
-				continue
-			fi
 
-			
-			if [ $resultAgencyFunction == 'true' ]		
-			then	
-				info "El codigo de agencia '$codigo_agencia' es valido. (Fue entontrado en el Archivo Maestro de agencias)"
-				info "Se moverá el archivo '$codigo_agencia' a la carpeta de recibidos"									
-				mover $FILE $RECIBIDOS
-			else
-				info "El codigo de agencia '$codigo_agencia' es inválido.(No fue hayado en el Archivo Maestro de agencias)"
-				info "Se moverá el archivo '$codigo_agencia' a la carpeta de rechazados"						
-				mover $FILE $RECHAZADOS
-				continue
-			fi
-	      
-		fi
+        info "Buscando archivos en la carpeta '$ARRIDIR'"
 
-	done
+        cd $ARRIDIR
+
+        #Recorro todos los archivos dentro del directorio de arribos en busca de archivos con nombres validos
+        for FILE in `ls`
+        do
+                FILTERED_FILE_NAME=$(ls $FILE | egrep ^[a-zA-Z0-9]*\.[0-9]{6}$)
+        
+                if [ -z $FILTERED_FILE_NAME ]
+                then
+                        info "La estructura del nombre del archivo: '$FILE' es invalida."
+                        info "Se moverá a la carpeta de rechazados"          
+                        mover "$FILE" "$RECHAZADOS"
+                else
+                        info "La estructura del nombre del archivo: '$FILE' es valida"                          
+                        info "Validando el codigo de agencia"
+                
+                        codigo_agencia=$(echo $FILE | cut -d'.' -f1)
+                        sequence=$(echo $FILE | cut -d'.' -f2)
+                
+                        validAgencyCode $codigo_agencia resultAgencyFunction
+                        validSequence $sequence $codigo_agencia resultSequenceFunction
+                        
+                        #Actualiza el archivo de secuencias                     
+                        if [ $resultSequenceFunction == 'true' ];then
+                                actualizar_archivo_secuencias $codigo_agencia $sequence
+                                info "La secuencia del codigo de agencia '$codigo_agencia' fue actualizada correctamente"
+                        else
+                                error "La secuencia '$sequence' fue considerada invalida (ver detalle log)"
+                                error "Se moverá el archivo '$codigo_agencia' a la carpeta de rechazados"
+                                mover $FILE $RECHAZADOS                                                                                 
+                                continue
+                        fi
+
+
+                        
+                        if [ $resultAgencyFunction == 'true' ]          
+                        then    
+                                info "El codigo de agencia '$codigo_agencia' es valido. (Fue entontrado en el Archivo Maestro de agencias)"
+                                info "Se moverá el archivo '$codigo_agencia' a la carpeta de recibidos"
+                                mover $FILE $RECIBIDOS
+                        else
+                                info "El codigo de agencia '$codigo_agencia' es inválido.(No fue hayado en el Archivo Maestro de agencias)"
+                                info "Se moverá el archivo '$codigo_agencia' a la carpeta de rechazados"                                                
+                                mover $FILE $RECHAZADOS
+                                continue
+                        fi
+              
+                fi
+
+
+        done
   #Chequea si estan dadas las condiciones para que se invoque el Postular  
   if [ `ls $RECIBIDOS | wc -l` -ne 0 ];then
-	    
+            
       if [ `ps axo 'pid=,command=' | grep -v grep | grep postular.sh | cut -f1 | wc -l` ];then
         executePosultar
       else
@@ -227,7 +232,9 @@ function execute() {
     info "No se recibieron nuevos archivos"
   fi
 
+
 }
+
 
 #======================================================= M  A  I  N  =================================================================================#
 function main() {
@@ -239,8 +246,9 @@ function main() {
     } &
 }
 
+
 case $1 in
-	"start")
+        "start")
        start
     ;;
     "shutdown")
