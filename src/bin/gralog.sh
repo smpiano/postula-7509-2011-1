@@ -78,7 +78,7 @@ verificarSiArchivoExcedeLogsize (){
 
 
 #####Flujo principal#####
-NOMBRE_USUARIO=`whoami`
+NOMBRE_USUARIO=$USERID
 NOMBRE_COMANDO=""
 TIPO_MENSAJE="I"
 MENSAJE=""

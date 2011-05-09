@@ -484,9 +484,9 @@ instalar () {
 guardarInformacionInstalacion () {
 	>$INSTULA_CONF
 	"$BINDIR/service_instula_conf.sh" CURRDIR "$GRUPO"
-	"$BINDIR/service_instula_conf.sh" CONFDIR "$CONFDIR"
 	"$BINDIR/service_instula_conf.sh" ARRIDIR "$ARRIDIR"
 	"$BINDIR/service_instula_conf.sh" BINDIR "$BINDIR"
+	"$BINDIR/service_instula_conf.sh" CONFDIR "$CONFDIR"
 	"$BINDIR/service_instula_conf.sh" DATASIZE "$DATASIZE"
 	"$BINDIR/service_instula_conf.sh" LOGDIR "$LOGDIR"
 	"$BINDIR/service_instula_conf.sh" LOGEXT "$LOGEXT"
@@ -505,6 +505,10 @@ guardarInformacionInstalacion () {
 	"$BINDIR/service_instula_conf.sh" POSTLIST "$POSTLIST"
 	"$BINDIR/service_instula_conf.sh" POSTONIO_TIEMPO_ESPERA "$POSTONIO_TIEMPO_ESPERA"
 	"$BINDIR/service_instula_conf.sh" DATADIR "$GRUPO/data"
+	"$BINDIR/service_instula_conf.sh" NUEVOS "$GRUPO/nuevos"
+	"$BINDIR/service_instula_conf.sh" RECIBIDOS "$GRUPO/recibidos"
+	"$BINDIR/service_instula_conf.sh" PROCESADOS "$GRUPO/procesados"
+	"$BINDIR/service_instula_conf.sh" RECHAZADOS "$GRUPO/rechazados"
 }
 
 ########## PASO 17 : BORRAR ARCHIVOS TEMPORARIOS ##########

@@ -10,6 +10,7 @@ evariables () {
   echo "CONFDIR=$CONFDIR";
   echo "DATASIZE=$DATASIZE";
   echo "LOGDIR=$LOGDIR";
+  echo "LOGEXT=$LOGEXT";
   echo "MAXLOGSIZE=$MAXLOGSIZE";
   echo "USERID=$USERID";
   echo "FECINS=$FECINS";
@@ -74,10 +75,10 @@ else
   POSTULA_ENV="Loaded"
   POSTONIO_TIEMPO_ESPERA="`./service_instula_conf.sh POSTONIO_TIEMPO_ESPERA`"
   DATADIR="`./service_instula_conf.sh DATADIR`"
-  NUEVOS="$GRUPO/nuevos"
-  RECIBIDOS="$GRUPO/recibidos"
-  RECHAZADOS="$GRUPO/rechazados"
-  PROCESADOS="$GRUPO/procesados"
+  NUEVOS="`./service_instula_conf.sh NUEVOS`"
+  RECIBIDOS="`./service_instula_conf.sh RECIBIDOS`"
+  RECHAZADOS="`./service_instula_conf.sh RECHAZADOS`"
+  PROCESADOS="`./service_instula_conf.sh PROCESADOS`"
 
   # Valido la existencia
   #exist $GRUPO
@@ -112,7 +113,8 @@ else
   export RECHAZADOS
 
   # Imprimo variables
-  echo "\n Imprimo variables:"
+  echo ""
+  echo " Imprimo variables:"
   evariables
 
   # Verifico si esta postonio levantado
