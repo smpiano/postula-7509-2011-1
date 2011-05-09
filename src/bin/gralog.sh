@@ -1,16 +1,16 @@
 #!/bin/bash
 
-################################### GRALOG ###################################
-#                                                                            #
-# Parámetros:                                                                #
-# 	(comando, TIPO_MENSAJE, NOMBRE_COMANDO, MENSAJE)                     #
-# 	                                                                     #
-# comando: nombre del archivo de log en el que se va a almacenar el MENSAJE  #
-# NOMBRE_COMANDO: Nombre del comado que genera el MENSAJE                    #
-# TIPO_MENSAJE: I = INFO; A = ALERTA; E = ERROR; ES = ERROR SEVERO           #
-# MENSAJE: Mensaje a guardar en el archivo de log.	                     #
-#                                                                            #
-############################################################################## 
+################################### GRALOG ##########################################
+#                                                                                   #
+# Parámetros:                                                                       #
+#    	       (NOMBRE_ARCHIVO, NOMBRE_COMANDO, TIPO_MENSAJE, MENSAJE)              #
+# 	                                                                            #
+# NOMBRE_ARCHIVO: nombre del archivo de log en el que se va a almacenar el MENSAJE  #
+# NOMBRE_COMANDO: Nombre del comado que genera el MENSAJE                           #
+# TIPO_MENSAJE: I = INFO; A = ALERTA; E = ERROR; ES = ERROR SEVERO                  #
+# MENSAJE: Mensaje a guardar en el archivo de log.	                            #
+#                                                                                   #
+#################################################################################### 
 
 
 #Función que verifica si el archivo supera el tamaño máximo
@@ -24,6 +24,7 @@ verificarSiArchivoExcedeLogsize (){
 	arch_log=`grep "$NOMBRE_ARCHIVO.$EXTENSION_ARCH_LOG" "$DIRECTORIO_LOGS/nombres_archivos.tmp"`
 
 	if [ "$arch_log"="$NOMBRE_ARCHIVO.$EXTENSION_ARCH_LOG" ]
+
 	then
 		cd $DIRECTORIO_LOGS
 		cant_bytes=`wc -c $arch_log | cut -d' ' -f1` #Tomo la cantidad de bytes que ocupa
@@ -66,13 +67,13 @@ verificarSiArchivoExcedeLogsize (){
 			rm $DIRECTORIO_LOGS/"$NOMBRE_ARCHIVO."$EXTENSION_ARCH_LOG
 			mv $DIRECTORIO_LOGS/"temp.log" $DIRECTORIO_LOGS/"$NOMBRE_ARCHIVO."$EXTENSION_ARCH_LOG
 
-		fi #[ $cant_bytes > $MAX_SIZE_LOG]
+		fi #[ ${cant_bytes:-0} -ge $MAX_SIZE_LOG]
 	
-	fi #[ "$arch_log" = "gralog."$EXTENSION_ARCH_LOG ]
+	fi # [ "$arch_log"="$NOMBRE_ARCHIVO.$EXTENSION_ARCH_LOG" ]
 
 	rm "$DIRECTORIO_LOGS/nombres_archivos.tmp"
 
-} #Fin verificar_archivo_excede_logsize ()
+} #Fin verificarSiArchivoExcedeLogsize ()
 
 
 
