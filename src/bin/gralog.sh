@@ -111,7 +111,6 @@ fi #[ $tipo = "I" -o $tipo = "A" -o $tipo = "E" -o $tipo = "ES" ]
 #Mensaje
 MENSAJE="$4"
 
-DIRECTORIO_GRUPO="$CURRDIR" #Obtengo el directorio en el que debo posicionarme para ejecutar los comandos
 DIRECTORIO_LOGS="$LOGDIR" #Obtengo el directorio en donde se almacenan los logs
 EXTENSION_ARCH_LOG="$LOGEXT" #Obtengo la extensión del archivo de log (sin .)
 MAX_SIZE_LOG="$MAXLOGSIZE" #Obtengo el máximo tamaño que puede ocupar un archivo de log
@@ -120,7 +119,7 @@ MAX_SIZE_LOG="$MAXLOGSIZE" #Obtengo el máximo tamaño que puede ocupar un archi
 if [ ! -d "$DIRECTORIO_LOGS" ]
 then
 	#Creo el directorio
-	mkdir "$DIRECTORIO_LOGS"
+	mkdir -p "$DIRECTORIO_LOGS"
 
 	#Creo el archivo de log
 	>"$DIRECTORIO_LOGS/$NOMBRE_ARCHIVO.$EXTENSION_ARCH_LOG"

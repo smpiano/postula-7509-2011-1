@@ -18,15 +18,15 @@ evariables () {
   echo "DATADIR=$DATADIR"
   echo "NUEVOS=$NUEVOS";
   echo "RECIBIDOS=$RECIBIDOS";
+  echo "PROCESADOS=$PROCESADOS"
   echo "RECHAZADOS=$RECHAZADOS";
 }
 
 # Funcion que corre POSTONIO
 runPostonio () {
-  #Nico tiene que editar aca.
-  #./postonio.sh start
-  local postonio_en_ejecucion="`echo $?`"
-  if [ "$postonio_en_ejecucion" != 0 ]
+
+  postonio.sh start
+  if [ $? != 0 ]
   then
     echo "Analizar error"
   else
@@ -58,9 +58,9 @@ then
   evariables
 else
   # Seteo las variables de entorno para la sesion del usuario (la idea seria que me lleguen como parametro)
-  CURRDIR="$PWD"					# Directorio Actual de trabajo 
+  CURRDIR="$PWD"					# Directorio Actual de trabajo
   GRUPO="`./service_instula_conf.sh CURRDIR`"		# Directorio del grupo
-  ARRIDIR="`./service_instula_conf.sh ARRIDIR`"		# Directorio de arribos de archivos externos 
+  ARRIDIR="`./service_instula_conf.sh ARRIDIR`"		# Directorio de arribos de archivos externos
   BINDIR="`./service_instula_conf.sh BINDIR`"		# Directorio para los ejecutables
   CONFDIR="`./service_instula_conf.sh CONFDIR`"		# Directorio para los archivos de configuracion
   DATASIZE="`./service_instula_conf.sh DATASIZE`"	# Espacio minimo necesario en el directorio ARRIDIR en Mb
@@ -69,14 +69,15 @@ else
   MAXLOGSIZE="`./service_instula_conf.sh MAXLOGSIZE`"	# Tamanio maximo de los archivos de log
   USERID="`./service_instula_conf.sh USERID`"			# Usuario de la instalacion
   FECINS="`date +%d/%m/%Y\ %H:%M`"  # Fecha y Hora de inicio de instalacion
-  MAESTRO_AGENCIAS="$CONFDIR/agencias.mae"
-  MAESTRO_BENEFICIOS="$CONFDIR/beneficios.mae"
+  MAESTRO_AGENCIAS="`./service_instula_conf.sh MAESTRO_AGENCIAS`"
+  MAESTRO_BENEFICIOS="`./service_instula_conf.sh MAESTRO_BENEFICIOS`"
   POSTULA_ENV="Loaded"
   POSTONIO_TIEMPO_ESPERA="`./service_instula_conf.sh POSTONIO_TIEMPO_ESPERA`"
   DATADIR="`./service_instula_conf.sh DATADIR`"
   NUEVOS="$GRUPO/nuevos"
   RECIBIDOS="$GRUPO/recibidos"
   RECHAZADOS="$GRUPO/rechazados"
+  PROCESADOS="$GRUPO/procesados"
 
   # Valido la existencia
   #exist $GRUPO
@@ -107,12 +108,13 @@ else
   export DATADIR
   export NUEVOS
   export RECIBIDOS
+  export PROCESADOS
   export RECHAZADOS
 
   # Imprimo variables
   echo "\n Imprimo variables:"
   evariables
-	
+
   # Verifico si esta postonio levantado
   postonio=`ps xc | grep -v grep | grep 'postonio.sh'`
 
@@ -120,7 +122,7 @@ else
   then
     # Levanto postonio
     echo "levanto postonio.."
-    #runPostonio
+    runPostonio
   else
     # Fuerzo a postonio a correr
     echo "\nInicializacion de Ambiente Concluida"

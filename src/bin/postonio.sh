@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source utils.sh
+source agencia_helpers.sh
 
 AGENCY_SEQUENCES=$CONFDIR/AGENCY_SEQUENCES.txt
 
@@ -42,20 +43,11 @@ function isInAgencyMasterFile(){
 
 	info  "Buscando el codigo de agencia '$agency_code' en el archivo maestro de agencias"
 	
-	exec < $DATADIR/agencias2.mae
-	while read LINE  
-	do
-		info "Buscando en la linea; '$LINE' "
-		bar=( $LINE )
-		info "Chequeando Codigo de agencia = ${bar[1]}"
-		
-		if [ $agency_code == ${bar[1]} ]
-		then
-			info "Codigo de Agencia encontrado !"			
-			found='true'
-			#Cortar el ciclo!
-		fi
-	done
+  found="true"
+  datos_agencia=`buscar_agencia $agency_code`
+  if [[ $datos_agencia = '' ]]; then
+    found="false"
+  fi
 
 	eval $___result="'$found'"
 }
@@ -114,15 +106,11 @@ function validSequence(){
 	if [ $secuencia == 'null' ];then
 		echo $linea_archivo>>$AGENCY_SEQUENCES
 		eval $_resultSequenceFunction='true'
-	fi
-	
-	if [ $_sequence -le $secuencia ];then
+	elif [ $_sequence -le $secuencia ];then
 		error "El numero de secuencia de la agencia a insertar no es incremental."
 		error "Se quizo insertar '$_sequence' y el mayor numero de secuencia asociado al codigo de agencia :'$_agency_code' es '$secuencia'"
 		eval $_resultSequenceFunction='false'
-	fi
-
-	if [ $_sequence -gt $secuencia ];then
+	elif [ $_sequence -gt $secuencia ];then
 		eval $_resultSequenceFunction='true'
 	fi
 }
@@ -159,7 +147,6 @@ function executePosultar(){
 
 # Funcion principal del demonio
 function execute() {
-	
 	if [ -a $AGENCY_SEQUENCES ] 
 	then
 	  info "Se empleara el archivo '$AGENCY_SEQUENCES' para almacenar las secuencias entrantes y realizar las validaciones pertinentes"
@@ -181,15 +168,15 @@ function execute() {
 	cd $ARRIDIR
 
 	#Recorro todos los archivos dentro del directorio de arribos en busca de archivos con nombres validos
-	for FILE in *.*
+	for FILE in `ls`
 	do
-		FILTERED_FILE_NAME=$(ls $FILE | egrep ^[a-zA-Z]*\.[0-9]{6}$)
+		FILTERED_FILE_NAME=$(ls $FILE | egrep ^[a-zA-Z0-9]*\.[0-9]{6}$)
 	
 		if [ -z $FILTERED_FILE_NAME ]
 		then
 			info "La estructura del nombre del archivo: '$FILE' es invalida."
 			info "Se moverá a la carpeta de rechazados"
-          move $FILE $RECHAZADOS          
+          mover $FILE $RECHAZADOS
 		else
 			info "La estructura del nombre del archivo: '$FILE' es valida"				
 			info "Validando el codigo de agencia"
@@ -227,7 +214,7 @@ function execute() {
         #Chequea si estan dadas las condiciones para que se invoque el Postular  
         if [ `ls $RECIBIDOS | wc -l` -ne 0 ];then
 				    
-            if [ ps axo 'pid=,command=' | grep postular.sh | cut -f1 | wc -l ];then
+            if [ `ps axo 'pid=,command=' | grep -v grep | grep postular.sh | cut -f1 | wc -l` ];then
               executePosultar
             else
               info "Postular ya se encuentra ejecutando"
