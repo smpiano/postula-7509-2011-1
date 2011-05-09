@@ -5,11 +5,6 @@ source beneficio_helpers.sh
 
 CAMPOS_NOVEDAD=( CUIL 'Tipo doc' 'Nro doc' Apellido Nombre Domicilio Localidad Provincia 'Código de Beneficio' 'Fecha pedido de Alta' 'Duración pedida' )
 
-GRUPO=${GRUPO:-$PWD/grupo02}
-PATH=$PATH:$PWD
-DIR_ARRIBOS=${ARRIDIR:-arribos}
-export LOGDIR="$GRUPO/logs" LOGEXT='log' MAXLOGSIZE=10000000000000
-VERBOSE=true
 POSTULA_ENV='s'
 
 main() {
@@ -21,8 +16,8 @@ main() {
   checkEnvironmentLoaded || exit 1
 
   cd $RECIBIDOS
-  local output_file="$GRUPO/benef.$$"
-  local error_file="$GRUPO/benerro.$$"
+  local output_file="$NUEVOS/benef.$$"
+  local error_file="$NUEVOS/benerro.$$"
 
   while local archivo_novedades=`ls | grep '^.\{6\}\.[0-9]\{1,\}$' | head -n 1`; [[ $archivo_novedades != '' ]]; do
     # Rechazar si agencia no existe
@@ -32,7 +27,7 @@ main() {
     DATOS_AGENCIA=`buscar_agencia $agencia`
     if [[ -z $DATOS_AGENCIA ]]; then
       log "Agencia desconocida $agencia, se rechaza el archivo $archivo_novedades"
-      mover $archivo_novedades $archivo_novedades.invalido
+      mover $archivo_novedades $RECHAZADOS
       continue
     fi
 
