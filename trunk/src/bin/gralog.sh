@@ -31,7 +31,7 @@ verificarSiArchivoExcedeLogsize (){
 		if [ ${cant_bytes:-0} -ge $MAX_SIZE_LOG ]
 		then
 			#Grabo en el log que el tamaño fue excedido
-			echo `date '+%m-%d-%y %T'`" - "$NOMBRE_USUARIO" - "$NOMBRE_COMANDO" - I - Log excedido">>$DIRECTORIO_LOGS/"$NOMBRE_ARCHIVO."$EXTENSION_ARCH_LOG
+			echo $NOMBRE_ARCHIVO.$EXTENSION_ARCH_LOG" - "`date '+%m-%d-%y %T'`" - "$NOMBRE_USUARIO" - "$NOMBRE_COMANDO" - I - Log excedido">>$DIRECTORIO_LOGS/"$NOMBRE_ARCHIVO."$EXTENSION_ARCH_LOG
 
 			bytes_acum=0
 			mitad_tamanio=0
@@ -113,7 +113,7 @@ MENSAJE="$4"
 
 DIRECTORIO_LOGS="$LOGDIR" #Obtengo el directorio en donde se almacenan los logs
 EXTENSION_ARCH_LOG="$LOGEXT" #Obtengo la extensión del archivo de log (sin .)
-MAX_SIZE_LOG="$MAXLOGSIZE" #Obtengo el máximo tamaño que puede ocupar un archivo de log
+MAX_SIZE_LOG=$(($MAXLOGSIZE\*1024)) #Obtengo el máximo tamaño que puede ocupar un archivo de log (en bytes)
 
 #Verifico si existe el directorio de los archivos de log
 if [ ! -d "$DIRECTORIO_LOGS" ]
