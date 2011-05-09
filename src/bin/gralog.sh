@@ -112,6 +112,22 @@ fi #[ $tipo = "I" -o $tipo = "A" -o $tipo = "E" -o $tipo = "ES" ]
 #Mensaje
 MENSAJE="$4"
 
+# Valido que el directorio de logs sea una ruta válida (no vacía)
+if [ -z "$LOGDIR" ]
+then
+	echo "El directorio especificado para almacenar los archivos de log es nulo."
+	echo "No será posible generar el archivo de log."
+	exit 2
+fi
+
+# Valido que no sea vacía la cantidad de KB que pueden ocupar los archivos de log
+if [ -z "$MAXLOGSIZE" ]
+then
+	echo "El tamaño especificado para los archivos de log es nulo."
+	echo "No será posible generar el archivo de log."
+	exit 2
+fi
+
 DIRECTORIO_LOGS="$LOGDIR" #Obtengo el directorio en donde se almacenan los logs
 EXTENSION_ARCH_LOG="$LOGEXT" #Obtengo la extensión del archivo de log (sin .)
 MAX_SIZE_LOG=$(($MAXLOGSIZE\*1024)) #Obtengo el máximo tamaño que puede ocupar un archivo de log (en bytes)
