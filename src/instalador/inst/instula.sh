@@ -3,7 +3,7 @@
 ######### Comando instula.sh #########
 
 # Declaración de variables globales
-TARDIR=`dirname $0`		# Nos indica donde se encuentran los archivos patrones de instalacion (es relativo al pwd).
+TARDIR="`dirname $0`"		# Nos indica donde se encuentran los archivos patrones de instalacion (es relativo al pwd).
 CURRDIR=$PWD
 GRUPO="$CURRDIR"
 INSTDIR="$GRUPO/inst"
@@ -21,6 +21,9 @@ POSTINI=""
 POSTONIO=""
 POSTULAR=""
 POSTLIST=""
+POSTONIO_TIEMPO_ESPERA="10"
+PATH_VALIDO=""
+SIZE_VALIDO=""
 ACEPTO_TERMINOS="no"
 
 # Variable usada para el nombre del archivo de log de instula
@@ -31,18 +34,18 @@ ARCHIVO_LOG="$CONFDIR/instula.log"
 antesDeInstula () {
 	# TODO borrar o arreglar
 	#$TARDIR/creacionDirectorioGrupoInstula.sh grupo02 $CURRDIR
-        $TARDIR/creacionDirectorioGrupoInstula.sh conf $GRUPO
-        $TARDIR/creacionDirectorioGrupoInstula.sh data $GRUPO
-        $TARDIR/creacionDirectorioGrupoInstula.sh inst $GRUPO
+	$TARDIR/creacionDirectorioGrupoInstula.sh conf $GRUPO
+	$TARDIR/creacionDirectorioGrupoInstula.sh data $GRUPO
+	$TARDIR/creacionDirectorioGrupoInstula.sh inst $GRUPO
 }
 
 loguear () {
 	if [ $# -eq 1 ]
-        then
-                echo "$1" | tee -a "$ARCHIVO_LOG"
-        else
-                echo "$1">>"$ARCHIVO_LOG"
-        fi
+	then
+		echo "$1" | tee -a "$ARCHIVO_LOG"
+	else
+		echo "$1">>"$ARCHIVO_LOG"
+	fi
 }
 
 # Muestra del proceso cancelado
@@ -82,16 +85,16 @@ postulaInstalado () {
 # Valida si los componentes tienen permiso de ejecucion
 existeComponente () {
 	if [ -x "$1" ]
-        then
-                echo "\n* <"$2">\t\t\t\t\t\t\t*"
-        fi
+	then
+		echo "\n* <"$2">\t\t\t\t\t\t\t*"
+	fi
 }
 
 noExisteComponente () {
 	if [ ! -x "$1" ]
-        then
-                echo "\n* <"$2">\t\t\t\t\t\t\t*"
-        fi
+	then
+		echo "\n* <"$2">\t\t\t\t\t\t\t*"
+	fi
 }
 
 # TODO ver como brindamos los datos de instalacion completa o instalacion parcial
@@ -127,15 +130,15 @@ isPostulaInstalado () {
 		# La instacion esta completa si:
 		# - Las variables de entorno estan en instula.conf
 		# - Los componentes existen
-		local user="`$INSTDIR/service_instula_conf.sh USERID`"
-		local fecha_postini="`$INSTDIR/service_instula_conf.sh POSTINI`"
-	        local fecha_postonio="`$INSTDIR/service_instula_conf.sh POSTONIO`"
-        	local fecha_postular="`$INSTDIR/service_instula_conf.sh POSTULAR`"
-	        local fecha_postlist="`$INSTDIR/service_instula_conf.sh POSTLIST`"
-		local componente_postini="$INSTDIR/postini.sh"
-		local componente_postonio="$INSTDIR/postonio.sh"
-		local componente_postular="$INSTDIR/postular.sh"
-		local componente_postlist="$INSTDIR/plist.pl"
+		local user="`$BINDIR/service_instula_conf.sh USERID`"
+		local fecha_postini="`$BINDIR/service_instula_conf.sh POSTINI`"
+		local fecha_postonio="`$BINDIR/service_instula_conf.sh POSTONIO`"
+		local fecha_postular="`$BINDIR/service_instula_conf.sh POSTULAR`"
+		local fecha_postlist="`$BINDIR/service_instula_conf.sh POSTLIST`"
+		local componente_postini="$BINDIR/postini.sh"
+		local componente_postonio="$BINDIR/postonio.sh"
+		local componente_postular="$BINDIR/postular.sh"
+		local componente_postlist="$BINDIR/plist.pl"
 		if [ ! -z "$user" -a ! -z "$fecha_postini" -a ! -z "$fecha_postonio" -a ! -z "$fecha_postular" -a ! -z "$fecha_postlist" -a -x "$componente_postini" -a -x "$componente_postonio" -a -x "$componente_postular" -a -x "$componente_postlist" ]
 		then
 			#Paso 2.1
@@ -189,21 +192,21 @@ consultaLicencia () {
 
 ########## PASO 4 : PERL INSTALADO ##########
 isPerlInstalado () {
-        perl_existe=`whereis perl`
+	perl_existe=`whereis perl`
 	loguear ""
-        if [ "$perl_existe" != "perl:" ]
-        then
-                local perl_version=`perl --version | grep 'v[0-9]\{1,2\}\(\.[0-9]\{1,2\}\)\{1,2\}' | cut -f4 -d' '`
-                local perl_release=`echo "$perl_version" | cut -f1 -d. | cut -c2-`
+	if [ "$perl_existe" != "perl:" ]
+	then
+		local perl_version=`perl --version | grep 'v[0-9]\{1,2\}\(\.[0-9]\{1,2\}\)\{1,2\}' | cut -f4 -d' '`
+		local perl_release=`echo "$perl_version" | cut -f1 -d. | cut -c2-`
 		if [ $perl_release -ge 5 ]
-                then
-                        loguear "Perl version 5 o superior esta instalado ($perl_version)"
-                else
-			errorPerl;
-                fi
-        else
+		then
+			loguear "Perl version 5 o superior esta instalado ($perl_version)"
+		else
+			erorPerl;
+		fi
+	else
 		errorPerl;
-        fi
+	fi
 }
 
 
@@ -232,23 +235,76 @@ mensajesInformativos () {
 
 ########## VALIDAR ##########
 validarPath () {
-        local dir_a_validar="$1"
-        local dir_default="$2"
-        if [ -z "$dir_a_validar" ]
-        then
-                loguear "$dir_default"
-        else
-                loguear "$GRUPO/`echo "$dir_a_validar" | sed 's/^\/\+//'`"
-        fi
+	local dir_a_validar="$1"
+	local dir_default="$2"
+
+	dir_a_validar="`echo "$dir_a_validar" | sed 's/^\(\/\|\.\|~\/\)\+//'`" # Corto caracteres de acceso relativo al inicio
+	dir_a_validar="`echo "$dir_a_validar" | sed 's/\/\{2,\}/\//g'`" # Corto varias ocurrencias de slashes a uno solo
+	dir_a_validar="`echo "$dir_a_validar" | sed 's/\/\+$//g'`" # Corto el ultimo si es un slash
+	if [ -z "$dir_a_validar" ]
+	then
+		PATH_VALIDO="`loguear "$dir_default"`"
+	else
+		# Valido que no tenga "/./" o "/../" o combinaciones de estas luego de un caracter distinto al "."
+		while [ ! -z "`echo "$dir_a_validar" | grep -o '[^\.]\(\/\.\.\?\/\)\+'`" ]
+		do
+			loguear "Usted ingresó una dirección inválida. Por favor ingrese nuevamente: \\c"
+			read dir_a_validar
+			loguear "$dir_a_validar" s
+			dir_a_validar="`echo "$dir_a_validar" | sed 's/^\(\/\|\.\|~\/\)\+//'`"
+			dir_a_validar="`echo "$dir_a_validar" | sed 's/\/\{2,\}/\//g'`"
+			dir_a_validar="`echo "$dir_a_validar" | sed 's/\/\+$//g'`"
+		done
+
+		if [ -z "$dir_a_validar" ]
+		then
+			PATH_VALIDO="`loguear "$dir_default"`"
+		else
+			PATH_VALIDO="`loguear "$GRUPO/$dir_a_validar"`"
+		fi
+	fi
+}
+
+validarSize () {
+	local size="$1"
+	local default="$2"
+	local minimo="$3"
+	local valido=""
+	while [ -z "$valido" -a ! -z "$size" ]
+	do
+		if [ ! -z "`echo "$size" | grep '[^0-9]\{1,\}'`" ]
+		then
+			loguear "La variable ingresada no es valida. Ingrese solo numeros: \\c"
+			read size
+			loguear "$size" s
+		else
+			if [ "$size" -le "$minimo" ]
+			then
+				loguear "El tamaño ingresado no debe ser inferior al minimo ($minimo)"
+				read size
+				loguear "$size" s
+			else
+				valido="true"
+			fi
+		fi
+	done
+
+	if [ -z "$size" ]
+	then
+		SIZE_VALIDO="$2"
+	else
+		SIZE_VALIDO="$size"
+	fi
 }
 
 ########## PASO 6 : DEFINIR DIRECTORIO DE EJECUTABLES ##########
 definirDirectorioEjecutables () {
-	local default=$BINDIR
+	local default="$BINDIR"
 	loguear "Ingrese el nombre del subdirectorio de ejecutables ($BINDIR): \\c"
 	read BINDIR
 	loguear "$BINDIR" s
-	BINDIR=`validarPath "$BINDIR" "$default"`
+	validarPath "$BINDIR" "$default"
+	BINDIR="$PATH_VALIDO"
 }
 
 ########## PASO 7 : DEFINIR DIRECTORIO DE ARRIBO DE ARCHIVOS EXTERNOS ##########
@@ -257,7 +313,8 @@ definirDirectorioArriboArchivos () {
 	loguear "Ingrese el nombre del directorio que permite el arribo de archivos externos ($ARRIDIR): \\c"
 	read ARRIDIR
 	loguear "$ARRIDIR" s
-	ARRIDIR=`validarPath "$ARRIDIR" "$default"`
+	validarPath "$ARRIDIR" "$default"
+	ARRIDIR="$PATH_VALIDO"
 }
 
 ########## PASO 8 : RESERVAR ESPACIO MINIMO PARA DATOS ##########
@@ -266,17 +323,8 @@ definirEspacioMinimoDatos () {
 	loguear "Ingrese el espacio mínimo requerido para datos externos (en Mbytes) ("$DATASIZE"Mb): \\c"
 	read DATASIZE
 	loguear "$DATASIZE" s
-	while [ ! -z "`echo "$DATASIZE" | grep '[^0-9]\{1,\}'`" ]
-        do
-                loguear "La variable ingresada no es valida. Ingrese solo numeros: \\c"
-                read DATASIZE
-		loguear "$DATASIZE" s
-        done
-
-        if [ -z "$DATASIZE" ]
-        then
-                DATASIZE="$default"
-        fi
+	validarSize "$DATASIZE" "$default" "100"
+	DATASIZE="$SIZE_VALIDO"
 }
 
 ########## PASO 9 : VERIFICAR ESPACIO EN DISCO ##########
@@ -299,7 +347,8 @@ definirDirectorioArchivosLog () {
 	loguear "Ingrese el nombre del directorio de log ($LOGDIR): \\c"
 	read LOGDIR
 	loguear "$LOGDIR" s
-	LOGDIR=`validarPath "$LOGDIR" "$default"`
+	validarPath "$LOGDIR" "$default"
+	LOGDIR="$PATH_VALIDO"
 }
 
 ########## PASO 11 : DEFINIR EXTENSION Y TAMAÑO DE ARCHIVOS DE LOG ##########
@@ -322,17 +371,8 @@ definirTamanioArchivosLog () {
 	loguear "Ingrese el tamaño máximo para los archivos $LOGEXT (en Kbytes) ("$LOGSIZE"KB): \\c"
 	read LOGSIZE
 	loguear "$LOGSIZE" s
-	while [ ! -z "`echo "$LOGSIZE" | grep '[^0-9]\{1,\}'`" ]
-        do
-                loguear "La variable ingresada no es valida. Ingrese solo numeros: \\c"
-                read LOGSIZE
-		loguear "$LOGSIZE" s
-        done
-
-        if [ -z "$LOGSIZE" ]
-        then
-                LOGSIZE="$default"
-        fi
+	validarSize "$LOGSIZE" "$default" "400"
+	LOGSIZE="$SIZE_VALIDO"
 }
 
 
@@ -421,21 +461,21 @@ instalar () {
 		fin
 		exit 1
 	fi
-	cp "$service_instula_conf" "$INSTDIR"
-	cp "$gralog" "$INSTDIR"
-	cp "$postini" "$INSTDIR"
+	cp "$service_instula_conf" "$BINDIR"
+	cp "$gralog" "$BINDIR"
+	cp "$postini" "$BINDIR"
 	POSTINI=`date "+%d-%m-%Y %H:%M.%N"`
 	loguear "Instalación del componente POSTINI completada"
 	
-	cp "$postonio" "$INSTDIR"
+	cp "$postonio" "$BINDIR"
 	POSTONIO=`date "+%d-%m-%Y %H:%M.%N"`
 	loguear "Instalación del componente POSTONIO completada"
 	
-	cp "$postular" "$INSTDIR"
+	cp "$postular" "$BINDIR"
 	POSTULAR=`date "+%d-%m-%Y %H:%M.%N"`
 	loguear "Instalación del componente POSTULAR completada"
 	
-	cp "$postlist" "$INSTDIR"
+	cp "$postlist" "$BINDIR"
 	POSTLIST=`date "+%d-%m-%Y %H:%M.%N"`
 	loguear "Instalación del componente PLIST.PL completada"
 }
@@ -443,26 +483,28 @@ instalar () {
 ########## PASO 16 : GUARDAR LA INFORMACION DE LA INSTALACION ##########
 guardarInformacionInstalacion () {
 	>$INSTULA_CONF
-	"$INSTDIR/service_instula_conf.sh" CURRDIR "$GRUPO"
-	"$INSTDIR/service_instula_conf.sh" CONFDIR "$CONFDIR"
-	"$INSTDIR/service_instula_conf.sh" ARRIDIR "$ARRIDIR"
-	"$INSTDIR/service_instula_conf.sh" BINDIR "$BINDIR"
-	"$INSTDIR/service_instula_conf.sh" DATASIZE "$DATASIZE"
-	"$INSTDIR/service_instula_conf.sh" LOGDIR "$LOGDIR"
-	"$INSTDIR/service_instula_conf.sh" LOGEXT "$LOGEXT"
-	"$INSTDIR/service_instula_conf.sh" MAXLOGSIZE "$LOGSIZE"
-	"$INSTDIR/service_instula_conf.sh" USERID "$USERID"
-	"$INSTDIR/service_instula_conf.sh" FECINST "$FECINST"
+	"$BINDIR/service_instula_conf.sh" CURRDIR "$GRUPO"
+	"$BINDIR/service_instula_conf.sh" CONFDIR "$CONFDIR"
+	"$BINDIR/service_instula_conf.sh" ARRIDIR "$ARRIDIR"
+	"$BINDIR/service_instula_conf.sh" BINDIR "$BINDIR"
+	"$BINDIR/service_instula_conf.sh" DATASIZE "$DATASIZE"
+	"$BINDIR/service_instula_conf.sh" LOGDIR "$LOGDIR"
+	"$BINDIR/service_instula_conf.sh" LOGEXT "$LOGEXT"
+	"$BINDIR/service_instula_conf.sh" MAXLOGSIZE "$LOGSIZE"
+	"$BINDIR/service_instula_conf.sh" USERID "$USERID"
+	"$BINDIR/service_instula_conf.sh" FECINST "$FECINST"
 	#Escribo hasta la linea 20
 	local lineas_faltantes=$((20-`cat "$INSTULA_CONF" | wc -l`))
 	for i in $(seq $lineas_faltantes)
 	do
 		echo "<reserved>">>"$INSTULA_CONF"
 	done
-	"$INSTDIR/service_instula_conf.sh" POSTINI "$POSTINI"
-	"$INSTDIR/service_instula_conf.sh" POSTONIO "$POSTONIO"
-	"$INSTDIR/service_instula_conf.sh" POSTULAR "$POSTULAR"
-	"$INSTDIR/service_instula_conf.sh" POSTLIST "$POSTLIST"
+	"$BINDIR/service_instula_conf.sh" POSTINI "$POSTINI"
+	"$BINDIR/service_instula_conf.sh" POSTONIO "$POSTONIO"
+	"$BINDIR/service_instula_conf.sh" POSTULAR "$POSTULAR"
+	"$BINDIR/service_instula_conf.sh" POSTLIST "$POSTLIST"
+	"$BINDIR/service_instula_conf.sh" POSTONIO_TIEMPO_ESPERA "$POSTONIO_TIEMPO_ESPERA"
+	"$BINDIR/service_instula_conf.sh" DATADIR "$GRUPO/data"
 }
 
 ########## PASO 17 : BORRAR ARCHIVOS TEMPORARIOS ##########
@@ -492,9 +534,10 @@ mostrarMensajesInstalacion(){
 ########## PASO 19 : FIN ##########
 # Metodo de finalizacion de instalacion
 fin () {
-        #TODO cerrar instula.log
+	#TODO cerrar instula.log
 	loguear "Fin archivo - instula.log (cerrado)" s
 }
+
 
 antesDeInstula
 inicializarArchivoLog
