@@ -15,6 +15,10 @@ error() {
   log "$1" "E" "${@:2}"
 }
 
+error_severo() {
+  log "$1" "ES" "${@:2}"
+}
+
 checkCurrentScriptAlreadyRunning() {
   # Listar todos los comandos | filtrar los que tienen el nombre de archivo y no son 'grep' | contar la cantidad de comandos
   count=`ps eo command='' | grep -v grep | grep -c -e "$0"`
