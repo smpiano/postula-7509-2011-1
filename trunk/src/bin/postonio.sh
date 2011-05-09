@@ -176,7 +176,7 @@ function execute() {
 		then
 			info "La estructura del nombre del archivo: '$FILE' es invalida."
 			info "Se moverá a la carpeta de rechazados"
-          mover $FILE $RECHAZADOS
+          mover "$FILE" "$RECHAZADOS"
 		else
 			info "La estructura del nombre del archivo: '$FILE' es valida"				
 			info "Validando el codigo de agencia"
@@ -195,7 +195,7 @@ function execute() {
 				error "La secuencia '$sequence' fue considerada invalida (ver detalle log)"
 				error "Se moverá el archivo '$codigo_agencia' a la carpeta de rechazados"
 				mover $FILE $RECHAZADOS 										
-				exit 1
+				continue
 			fi
 
 			
@@ -207,26 +207,26 @@ function execute() {
 			else
 				info "El codigo de agencia '$codigo_agencia' es inválido.(No fue hayado en el Archivo Maestro de agencias)"
 				info "Se moverá el archivo '$codigo_agencia' a la carpeta de rechazados"						
-				exit 1
 				mover $FILE $RECHAZADOS
+				continue
 			fi
 	      
-        #Chequea si estan dadas las condiciones para que se invoque el Postular  
-        if [ `ls $RECIBIDOS | wc -l` -ne 0 ];then
-				    
-            if [ `ps axo 'pid=,command=' | grep -v grep | grep postular.sh | cut -f1 | wc -l` ];then
-              executePosultar
-            else
-              info "Postular ya se encuentra ejecutando"
-            fi
-        
-        else
-          info "No se recibieron nuevos archivos"
-        fi
-			
 		fi
 
 	done
+  #Chequea si estan dadas las condiciones para que se invoque el Postular  
+  if [ `ls $RECIBIDOS | wc -l` -ne 0 ];then
+	    
+      if [ `ps axo 'pid=,command=' | grep -v grep | grep postular.sh | cut -f1 | wc -l` ];then
+        executePosultar
+      else
+        info "Postular ya se encuentra ejecutando"
+      fi
+  
+  else
+    info "No se recibieron nuevos archivos"
+  fi
+
 }
 
 #======================================================= M  A  I  N  =================================================================================#
