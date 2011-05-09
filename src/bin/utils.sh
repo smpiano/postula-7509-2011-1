@@ -34,8 +34,7 @@ checkCurrentScriptAlreadyRunning() {
 }
 
 checkEnvironmentLoaded() {
-  # TODO: decidir de que manera saber si el ambiente está inicializado
-  if [[ ! -n "${POSTULA_ENV+x}" ]]
+  if [[ ! -n "${POSTULA_ENV}" ]]
   then
     error "Environment not loaded :("
     # Salir con false para poder manejar cancelación del script
