@@ -21,7 +21,7 @@ error_severo() {
 
 checkCurrentScriptAlreadyRunning() {
   # Listar todos los comandos | filtrar los que tienen el nombre de archivo y no son 'grep' | contar la cantidad de comandos
-  count=`ps eo command='' | grep -v grep | grep -c -e "$0"`
+  count=`ps axo 'pid=,command=' | grep -v grep | grep -c -e "$0"`
   # Descontar el fork creado por el backtick
   count=$(( $count - 1 ))
 
@@ -87,5 +87,6 @@ sumarMeses() {
 }
 
 mover() {
+  info "llamando al mover con $@"
   mover.sh "$@"
 }
