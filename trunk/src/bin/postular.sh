@@ -55,7 +55,7 @@ main() {
     info "- Total de beneficiarios nuevos: $cantidad_nuevo"
 
     # Enviar a recibidos
-    mover $archivo_novedades $PROCESADOS postular
+    mover "$archivo_novedades" "$PROCESADOS" postular
   done
 
   # presentar estadisticas
