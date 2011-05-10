@@ -112,6 +112,15 @@ fi #[ $tipo = "I" -o $tipo = "A" -o $tipo = "E" -o $tipo = "ES" ]
 #Mensaje
 MENSAJE="$4"
 
+
+# Valido que el ambiente haya sido correctamente inicializado
+if [ -z "$POSTINI_ENV" ]
+then
+	echo "El ambiente no ha sido correctamente inicializado."
+	echo "No será posile generar el archio de log."
+	exit 2
+fi # [ -z "$POSTINI_ENV" ]
+
 # Valido que el directorio de logs sea una ruta válida (no vacía)
 if [ -z "$LOGDIR" ]
 then
