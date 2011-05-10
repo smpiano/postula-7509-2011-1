@@ -3,7 +3,7 @@
 ######### Comando instula.sh #########
 
 # Declaración de variables globales
-TARDIR="`dirname $0`"		# Nos indica donde se encuentran los archivos patrones de instalacion (es relativo al pwd).
+TARDIR="`dirname "$0"`"		# Nos indica donde se encuentran los archivos patrones de instalacion (es relativo al pwd).
 CURRDIR=$PWD
 GRUPO="$CURRDIR"
 INSTDIR="$GRUPO/inst"
@@ -127,18 +127,20 @@ postulaIncompleto () {
 isPostulaInstalado () {
 	if [ -f "$INSTULA_CONF" ]
 	then
+		local bindir_configurado="`cat "$INSTULA_CONF" | grep 'BINDIR' | cut -f2 -d\=`"
+		cd "$bindir_configurado"
 		# La instacion esta completa si:
 		# - Las variables de entorno estan en instula.conf
 		# - Los componentes existen
-		local user="`$BINDIR/service_instula_conf.sh USERID`"
-		local fecha_postini="`$BINDIR/service_instula_conf.sh POSTINI`"
-		local fecha_postonio="`$BINDIR/service_instula_conf.sh POSTONIO`"
-		local fecha_postular="`$BINDIR/service_instula_conf.sh POSTULAR`"
-		local fecha_postlist="`$BINDIR/service_instula_conf.sh POSTLIST`"
-		local componente_postini="$BINDIR/postini.sh"
-		local componente_postonio="$BINDIR/postonio.sh"
-		local componente_postular="$BINDIR/postular.sh"
-		local componente_postlist="$BINDIR/plist.pl"
+		local user="`./service_instula_conf.sh USERID`"
+		local fecha_postini="`./service_instula_conf.sh POSTINI`"
+		local fecha_postonio="`./service_instula_conf.sh POSTONIO`"
+		local fecha_postular="`./service_instula_conf.sh POSTULAR`"
+		local fecha_postlist="`./service_instula_conf.sh POSTLIST`"
+		local componente_postini="postini.sh"
+		local componente_postonio="postonio.sh"
+		local componente_postular="postular.sh"
+		local componente_postlist="plist.pl"
 		if [ ! -z "$user" -a ! -z "$fecha_postini" -a ! -z "$fecha_postonio" -a ! -z "$fecha_postular" -a ! -z "$fecha_postlist" -a -x "$componente_postini" -a -x "$componente_postonio" -a -x "$componente_postular" -a -x "$componente_postlist" ]
 		then
 			#Paso 2.1
@@ -147,6 +149,7 @@ isPostulaInstalado () {
 			#Paso 2.2
 			postulaIncompleto "$componente_postini" "$componente_postonio" "$componente_postular" "$componente_postlist";
 		fi
+		cd "$CURRDIR"
 		exit 1;
 	fi
 }
