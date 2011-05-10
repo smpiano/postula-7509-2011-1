@@ -230,7 +230,7 @@ mensajesInformativos () {
 	loguear "Todos los directorios del sistema de postulantes serán subdirectorios de $GRUPO"
 	loguear ""
 	loguear "Todos los componentes de la instalación se obtendrán del repositorio: $INSTDIR"
-	loguear "Listando directorio:\n`ls $INSTDIR`"
+	loguear "Listando directorio:\n`ls $TARDIR`"
 	loguear ""
 	loguear "El archivo de configuración y el log de la instalación se registrarán en: $CONFDIR"
 }
