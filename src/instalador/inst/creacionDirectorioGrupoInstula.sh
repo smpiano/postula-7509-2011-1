@@ -7,7 +7,7 @@ RUTA_A_CHECKEAR=$2
 CURRENT="$RUTA_A_CHECKEAR/$NUEVO_SUBDIRECTORIO"
 if [ ! -d "$CURRENT" ]
 then
-	echo "El directorio \"$RUTA_A_CHECKEAR\" no contiene como ultmo directorio a \"$NUEVO_SUBDIRECTORIO\""
+	echo "El directorio \"$RUTA_A_CHECKEAR\" no contiene como subdirectorio a \"$NUEVO_SUBDIRECTORIO\""
 	mkdir -p $CURRENT;
 	echo "Se creo el directorio, \"$CURRENT\".."
 else
