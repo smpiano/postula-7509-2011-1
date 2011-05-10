@@ -1,2 +1,11 @@
-LE,,Weaver,Elizabeth,7468 Myrtle Pass,Hillsborough,Utah,8vmoe,2011-04-23,8,
-LE,20424723262,DU,212979774,Barnes,John,88394 Delaware Junction,Biggs,Utah,il8vm,2011-04-238
+LE,,Weaver,Elizabeth,7468 Myrtle Pass,Hillsborough,Utah,8vmoe,2011-04-23,8,,,
+LE,20424723262,212979774,Barnes,John,88394 Delaware Junction,Biggs,Utah,il8vm,2011-04-238
+,DU,302420517,Gardner,Laura,8659 Arkansas Hill,Coachella,New Jersey,zupdr,2011-04-23,5
+20669764307,,302420517,Gardner,Laura,8659 Arkansas Hill,Coachella,New Jersey,zupdr,2011-04-23,5
+20669764307,DU,,Gardner,Laura,8659 Arkansas Hill,Coachella,New Jersey,zupdr,2011-04-23,5
+20669764307,DU,302420517,,Laura,8659 Arkansas Hill,Coachella,New Jersey,zupdr,2011-04-23,5
+20669764307,DU,302420517,Gardner,,8659 Arkansas Hill,Coachella,New Jersey,zupdr,2011-04-23,5
+20669764307,DU,302420517,Gardner,Laura,,Coachella,New Jersey,zupdr,2011-04-23,5
+20669764307,DU,302420517,Gardner,Laura,8659 Arkansas Hill,,New Jersey,zupdr,2011-04-23,5
+20669764307,DU,302420517,Gardner,Laura,8659 Arkansas Hill,Coachella,,zupdr,2011-04-23,5
+20669764307,DU,302420517,Gardner,Laura,8659 Arkansas Hill,Coachella,New Jersey,,2011-04-23,5
