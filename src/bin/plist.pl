@@ -265,7 +265,7 @@ sub setear_salida {
 		if ($SECUENCIA_LISTADOS ne "") {
 			$SECUENCIA_LISTADOS++;
 		}else{
-			$SECUENCIA_LISTADOS = 0;
+			$SECUENCIA_LISTADOS = 1;
 		}
 
 		my $archivo_salida = "$LISTDIR/plist.$SECUENCIA_LISTADOS";
