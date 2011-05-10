@@ -21,6 +21,7 @@ evariables () {
   echo "RECIBIDOS=$RECIBIDOS";
   echo "PROCESADOS=$PROCESADOS"
   echo "RECHAZADOS=$RECHAZADOS";
+  echo "LISTDIR=$LISTDIR";
 }
 
 # Funcion que corre POSTONIO
@@ -79,6 +80,7 @@ else
   RECIBIDOS="`./service_instula_conf.sh RECIBIDOS`"
   RECHAZADOS="`./service_instula_conf.sh RECHAZADOS`"
   PROCESADOS="`./service_instula_conf.sh PROCESADOS`"
+  LISTDIR="`./service_instula_conf.sh LISTDIR`"
 
   # Valido la existencia
   #exist $GRUPO
@@ -111,6 +113,7 @@ else
   export RECIBIDOS
   export PROCESADOS
   export RECHAZADOS
+  export LISTDIR
 
   # Imprimo variables
   echo ""

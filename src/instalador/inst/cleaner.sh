@@ -17,9 +17,10 @@ NUEVOS="`./service_instula_conf.sh  NUEVOS`"
 RECIBIDOS="`./service_instula_conf.sh  RECIBIDOS`"
 PROCESADOS="`./service_instula_conf.sh  PROCESADOS`"
 RECHAZADOS="`./service_instula_conf.sh  RECHAZADOS`"
+LISTDIR="`./service_instula_conf.sh  LISTDIR`"
 
 
-if [ -d "$CURRDIR" -a -d "$ARRIDIR" -a -d "$BINDIR" -a -d "$CONFDIR" -a -d "$LOGDIR" -a -d "$DATADIR" -a -d "$NUEVOS" -a -d "$RECIBIDOS" -a -d "$PROCESADOS" -a -d "$RECHAZADOS" ]
+if [ -d "$CURRDIR" -a -d "$ARRIDIR" -a -d "$BINDIR" -a -d "$CONFDIR" -a -d "$LOGDIR" -a -d "$DATADIR" -a -d "$NUEVOS" -a -d "$RECIBIDOS" -a -d "$PROCESADOS" -a -d "$RECHAZADOS" -a -d "$LISTDIR" ]
 then
   echo "Borrando estructuras.."
   rm -rfv "$ARRIDIR"
@@ -31,6 +32,7 @@ then
   rm -rfv "$PROCESADOS"
   rm -rfv "$RECHAZADOS"
   rm -rfv "$CONFDIR"
+  rm -rfv "$LISTDIR"
   rm -v "$BINDIR/*.sh"
 else
   echo "No puede borrar alguno de los directorios no esta bien configurado en instula.conf"
