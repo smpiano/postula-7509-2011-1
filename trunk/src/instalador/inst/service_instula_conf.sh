@@ -18,7 +18,7 @@ VALOR=$2
 # Indico la posicion del archivo de configuracion
 #INSTULA_CONF="$PWD/instula.conf"
 CURR="$PWD"
-SCRIPT_DIR="`dirname $0`"
+SCRIPT_DIR="`dirname "$0"`"
 if [ -z "$SCRIPT_DIR" ]
 then
 	COMPLETE="$CURR"
