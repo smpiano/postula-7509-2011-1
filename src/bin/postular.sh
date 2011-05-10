@@ -5,8 +5,6 @@ source beneficio_helpers.sh
 
 CAMPOS_NOVEDAD=( CUIL 'Tipo doc' 'Nro doc' Apellido Nombre Domicilio Localidad Provincia 'Código de Beneficio' 'Fecha pedido de Alta' 'Duración pedida' )
 
-POSTULA_ENV='s'
-
 main() {
 
   # die if existe otro postular corriendo
