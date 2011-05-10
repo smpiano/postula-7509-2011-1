@@ -1,0 +1,57 @@
+Este archivo contiene información importante para la instalación del paquete.
+
+=====================
+Pasos de instalación
+=====================
+
+1) Se recomienda crear una carpeta llamada grupo02 para mayor prolijidad.
+
+2) Descargar el archivo build.tar.gz en grupo02.
+
+3) Descomprimir el archivo build.tar.gz utilizando el siguiente comando:
+   $ tar xzvf build.tar.gz
+
+4) Luego de descomprimir el archivo build.tar.gz se generará una estructura de directorios como se detalla a continuación:
+
+  /conf
+  /data
+  /inst
+
+  /inst contiene el script para realizar la instalación.
+
+6) Se puede ejecutar el instalador de cualquiera de los siguientes modos:
+   $ ./inst/instula.sh (utilizando bash)
+
+   o bien
+
+   $ sh inst/instula.sh (utilizando dash)
+
+   Se recomienda utilizar dash para una correcta visualización de los caracteres especiales.
+
+
+7) El instalador va a solicitar los siguientes parámetros con la opción de utilizar valores default:
+   * Path de directorio de trabajo
+   * Path de directorio de instalación
+   * Path de directorio de configuración
+   * Path de directorio de datos
+   * Path de librería de ejecutables
+   * Path de directorio de arribos
+   * Espacio mínimo en disco reservado para la instalación
+   * Path de directorio para los archivos de Log
+   * Extensión para los archivos de Log
+   * Tamaño máximo para cada archivo de Log
+
+   Una vez validados todos los parámetros es necesario inicializar el ambiente de trabajo.
+
+8) Para inicializar el ambiente de trabajo es necesario ejecutar el comando postini.sh.
+   Para ello el usuario deberá posicionarse en el path que seleccionó para almacenar la librería de ejecutables y escribir el comando: . postini.sh
+
+   Ejemplo:
+   Si el path de la librería de ejecutables es: /home/grupo02/bin
+   Se posiciona dentro de esa carpeta y se ejecuta el siguiente comando: 
+  
+   ~/grupo02/bin$ . postini.sh
+
+9) Cada comando indicará si la salida fue exitosa o no, enviado el correspondiente detalle al archivo de log.
+
+10) Enjoy ;)
