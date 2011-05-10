@@ -28,11 +28,12 @@ evariables () {
 runPostonio () {
 
   postonio.sh start
+  # El script postonio.sh arroja un exit 1 cuando ya está en ejecución.
   if [ $? != 0 ]
   then
-    echo "Analizar error"
+    echo "POSTONIO ya se encuentra en ejecución."
   else
-    echo "POSTONIO ha sido puesto en ejecucion"
+    echo "POSTONIO ha sido puesto en ejecución."
   fi
 }
 
