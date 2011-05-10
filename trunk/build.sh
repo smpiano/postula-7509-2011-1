@@ -1,6 +1,6 @@
 #!/bin/bash
 
-NOMBRE_TAR='build.tar'
+NOMBRE_TAR='build.tar.gz'
 
 # borra el tar si ya existe
 if [ -e "$NOMBRE_TAR" ]
@@ -32,8 +32,10 @@ mkdir inst
 # copia los archivos
 cp -ur src/data/* data
 
-cp -ur src/instalador/* inst
-cp -ur src/bin/* inst
+cp -ur src/instalador/instula.sh inst
+cp -ur src/instalador/creacionDirectorioGrupoInstula.sh inst
+cp -ur src/bin/*.sh inst
+cp -ur src/bin/plist.pl inst
 
 # borra los ocultos del svn
 cd data
@@ -45,7 +47,7 @@ rm -rf `find . -type d -name .svn`
 cd ..
 
 # crea el tar
-tar czf $NOMBRE_TAR conf data inst
+tar czfv $NOMBRE_TAR conf data inst
 
 # borra los directorios
 rm -r conf

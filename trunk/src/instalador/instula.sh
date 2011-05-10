@@ -456,17 +456,28 @@ instalar () {
 	local postonio="$TARDIR/postonio.sh"
 	local postular="$TARDIR/postular.sh"
 	local postlist="$TARDIR/plist.pl"
+	local agencia_helpers="$TARDIR/agencia_helpers.sh"
+	local beneficio_helpers="$TARDIR/beneficio_helpers.sh"
+	local clobber="$TARDIR/clobber.sh"
+	local mover="$TARDIR/mover.sh"
+	local utils="$TARDIR/utils.sh"
 	# TODO Importante: los archivos van a ser movidos desde el directorio patron TARDIR
 	# TODO mover los archivos del paquete postula
 	#copiar ademas service_instula_conf.sh
 
-	if [ ! -f "$postini" -o ! -f "$service_instula_conf" -o ! -f "$postonio" -o ! -f "$postular" -o ! -f "$postlist" -o ! -f "$gralog" ]
+	if [ ! -f "$postini" -o ! -f "$service_instula_conf" -o ! -f "$postonio" -o ! -f "$postular" -o ! -f "$postlist" -o ! -f "$gralog" -o ! -f "$mover" -o ! -f "$agencia_helpers" -o ! -f "$beneficio_helpers" -o ! -f "$clobber" -o ! -f "$utils" ]
 	then
 		loguear "Falta uno de los componentes, para poder continuar con la instalacion"
 		procesoCancelado
 		fin
 		exit 1
 	fi
+	cp "$service_instula_conf" "$BINDIR"
+	cp "$agencia_helpers" "$BINDIR"
+	cp "$beneficio_helpers" "$BINDIR"
+	cp "$clobber" "$BINDIR"
+	cp "$mover" "$BINDIR"
+	cp "$utils" "$BINDIR"
 	cp "$service_instula_conf" "$BINDIR"
 	echo "$INSTULA_CONF">>"$service_instula_conf_conf"
 	cp "$gralog" "$BINDIR"
