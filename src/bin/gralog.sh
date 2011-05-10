@@ -114,7 +114,7 @@ MENSAJE="$4"
 
 
 # Valido que el ambiente haya sido correctamente inicializado
-if [ -z "$POSTINI_ENV" ]
+if [ -z "$POSTULA_ENV" ] # Si el ambiente fue inicializado, POSTULA_ENV tiene el valor "Loaded"
 then
 	echo "El ambiente no ha sido correctamente inicializado."
 	echo "No será posile generar el archio de log."
