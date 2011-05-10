@@ -139,7 +139,7 @@ fi
 
 DIRECTORIO_LOGS="$LOGDIR" #Obtengo el directorio en donde se almacenan los logs
 EXTENSION_ARCH_LOG="$LOGEXT" #Obtengo la extensión del archivo de log (sin .)
-MAX_SIZE_LOG=$(($MAXLOGSIZE\*1024)) #Obtengo el máximo tamaño que puede ocupar un archivo de log (en bytes)
+MAX_SIZE_LOG=$(($MAXLOGSIZE * 1024)) #Obtengo el máximo tamaño que puede ocupar un archivo de log (en bytes)
 
 #Verifico si existe el directorio de los archivos de log
 if [ ! -d "$DIRECTORIO_LOGS" ]
