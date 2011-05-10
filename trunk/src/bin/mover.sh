@@ -12,7 +12,7 @@ source utils.sh
 # Validacion de cantidad de argumentos:
 if [ $# -lt 2 ]
 then
-	TIPO_MENSAJE="SE"
+	TIPO_MENSAJE="ES"
 	MENSAJE="Faltan argumentos. Uso: mover <origen> <destino> [<comando que invoca>]"
 	log "$MENSAJE" $TIPO_MENSAJE mover
 	exit 1
@@ -20,7 +20,7 @@ fi
 
 if [ $# -gt 3 ]
 then
-	TIPO_MENSAJE="SE"
+	TIPO_MENSAJE="ES"
 	MENSAJE="Sobran argumentos. Uso: mover <origen> <destino> [<comando que invoca>]"
 	log "$MENSAJE" $TIPO_MENSAJE mover
 	exit 1
@@ -33,7 +33,7 @@ DESTINO=$2
 
 if [ ! -e $ORIGEN ]
 then
-	TIPO_MENSAJE="SE"
+	TIPO_MENSAJE="ES"
 	MENSAJE="Archivo origen $ORIGEN inexistente"
 	log "$MENSAJE" $TIPO_MENSAJE mover
 	exit 2
@@ -41,8 +41,8 @@ fi
 
 if [ ! -d $DESTINO ]
 then
-	TIPO_MENSAJE="SE"
-	MENSAJE="Directorio destino $ORIGEN inexistente"
+	TIPO_MENSAJE="ES"
+	MENSAJE="Directorio destino $DESTINO inexistente"
 	log "$MENSAJE" $TIPO_MENSAJE mover
 	exit 2
 fi
