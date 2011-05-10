@@ -447,6 +447,7 @@ instalar () {
 	loguear "Iniciando instalación"
 	loguear "Moviendo archivos"
 	local postini="$TARDIR/postini.sh"
+	local service_instula_conf_conf="$BINDIR/service_instula_conf.conf"
 	local service_instula_conf="$TARDIR/service_instula_conf.sh"
 	local gralog="$TARDIR/gralog.sh"
 	local postonio="$TARDIR/postonio.sh"
@@ -464,6 +465,7 @@ instalar () {
 		exit 1
 	fi
 	cp "$service_instula_conf" "$BINDIR"
+	echo "$INSTULA_CONF">>"$service_instula_conf_conf"
 	cp "$gralog" "$BINDIR"
 	cp "$postini" "$BINDIR"
 	POSTINI=`date "+%d-%m-%Y %H:%M.%N"`
@@ -511,6 +513,7 @@ guardarInformacionInstalacion () {
 	"$BINDIR/service_instula_conf.sh" RECIBIDOS "$GRUPO/recibidos"
 	"$BINDIR/service_instula_conf.sh" PROCESADOS "$GRUPO/procesados"
 	"$BINDIR/service_instula_conf.sh" RECHAZADOS "$GRUPO/rechazados"
+	"$BINDIR/service_instula_conf.sh" LISTDIR "$GRUPO/list"
 }
 
 ########## PASO 17 : BORRAR ARCHIVOS TEMPORARIOS ##########
