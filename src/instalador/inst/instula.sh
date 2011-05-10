@@ -278,7 +278,7 @@ validarSize () {
 			read size
 			loguear "$size" s
 		else
-			if [ "$size" -le "$minimo" ]
+			if [ "$size" -lt "$minimo" ]
 			then
 				loguear "El tamaño ingresado no debe ser inferior al minimo ($minimo)"
 				read size
@@ -436,6 +436,8 @@ crearEstructurasDeDirectorio(){
 	loguear "Proceso de creacion de directorio ($GRUPO/rechazados) OK"
 	mkdir -p "$GRUPO/nuevos"
 	loguear "Proceso de creacion de directorio ($GRUPO/nuevos) OK"
+	mkdir -p "$GRUPO/procesados"
+	loguear "Proceso de creacion de directorio ($GRUPO/procesados) OK"
 	mkdir -p "$GRUPO/list"
 	loguear "Proceso de creacion de directorio ($GRUPO/list) OK"
 }
@@ -497,7 +499,7 @@ guardarInformacionInstalacion () {
 	local lineas_faltantes=$((20-`cat "$INSTULA_CONF" | wc -l`))
 	for i in $(seq $lineas_faltantes)
 	do
-		echo "<reserved>">>"$INSTULA_CONF"
+		echo "">>"$INSTULA_CONF"
 	done
 	"$BINDIR/service_instula_conf.sh" POSTINI "$POSTINI"
 	"$BINDIR/service_instula_conf.sh" POSTONIO "$POSTONIO"
