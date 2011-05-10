@@ -49,10 +49,7 @@ exist () {
 echo "...::: POSTINI :::..."
 
 # Comando que verifica la existencia de las variables de inicializacion de ambiente
-# TODO ver si grupo02 es necesario para poder validar la existencia
-CHECK="`echo $PATH | grep 'grupo02'`"
-
-if [ ! -z "$CHECK"  ]
+if [ ! -z "$POSTULA_ENV"  ]
 then
   echo "### ADVERTENCIA: las variables de entorno ya fueron seteadas ###"
 
