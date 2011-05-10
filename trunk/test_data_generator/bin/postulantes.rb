@@ -32,7 +32,7 @@ class RegistryOk
   end
 
   def cuil
-    "20-########-#".to_numbers
+    "20#########".to_numbers
   end
 
   def tipo_doc
