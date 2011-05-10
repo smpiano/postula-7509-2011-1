@@ -68,8 +68,6 @@ else
   MAXLOGSIZE="`./service_instula_conf.sh MAXLOGSIZE`"	# Tamanio maximo de los archivos de log
   USERID="`./service_instula_conf.sh USERID`"			# Usuario de la instalacion
   FECINS="`date +%d/%m/%Y\ %H:%M`"  # Fecha y Hora de inicio de instalacion
-  MAESTRO_AGENCIAS="`./service_instula_conf.sh MAESTRO_AGENCIAS`"
-  MAESTRO_BENEFICIOS="`./service_instula_conf.sh MAESTRO_BENEFICIOS`"
   POSTULA_ENV="Loaded"
   POSTONIO_TIEMPO_ESPERA="`./service_instula_conf.sh POSTONIO_TIEMPO_ESPERA`"
   DATADIR="`./service_instula_conf.sh DATADIR`"
@@ -78,6 +76,8 @@ else
   RECHAZADOS="`./service_instula_conf.sh RECHAZADOS`"
   PROCESADOS="`./service_instula_conf.sh PROCESADOS`"
   LISTDIR="`./service_instula_conf.sh LISTDIR`"
+  MAESTRO_AGENCIAS="$DATADIR/agencias.mae"
+  MAESTRO_BENEFICIOS="$DATADIR/beneficios.mae"
 
   # Valido la existencia
   #exist $GRUPO
