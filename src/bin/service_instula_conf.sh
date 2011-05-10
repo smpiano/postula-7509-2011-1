@@ -18,9 +18,23 @@ VALOR=$2
 # Indico la posicion del archivo de configuracion
 #INSTULA_CONF="$PWD/instula.conf"
 CURR="$PWD"
-SCRIPT_DIR="`dirname $0`"
-cd "$SCRIPT_DIR"
-INSTULA_CONF="../conf/instula.conf"
+SCRIPT_DIR="`dirname "$0"`"
+if [ -z "$SCRIPT_DIR" ]
+then
+	COMPLETE="$CURR"
+else
+	COMPLETE="$SCRIPT_DIR"
+fi
+
+if [ ! -f "$COMPLETE/service_instula_conf.conf" ]
+then
+	echo "No se puede inicializar el servicio, requiere de $COMPLETE/service_instula_conf.conf"
+else
+	INSTULA_CONF="`cat "$COMPLETE/service_instula_conf.conf"`"
+fi
+
+#cd "$SCRIPT_DIR"
+#INSTULA_CONF="$CURR/conf/instula.conf"
 
 if [ ! -f "$INSTULA_CONF" ]
 then
@@ -44,4 +58,4 @@ else
 		sed -i "s/$NOMBRE.*/$NOMBRE=$VALOR/" "$INSTULA_CONF"
 	fi
 fi
-cd "$CURR"
+#cd "$CURR"
