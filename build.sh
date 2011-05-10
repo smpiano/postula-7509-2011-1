@@ -34,6 +34,7 @@ cp -ur src/data/* data
 
 cp -ur src/instalador/instula.sh inst
 cp -ur src/instalador/creacionDirectorioGrupoInstula.sh inst
+cp -ur src/instalador/README inst
 cp -ur src/bin/*.sh inst
 cp -ur src/bin/plist.pl inst
 
