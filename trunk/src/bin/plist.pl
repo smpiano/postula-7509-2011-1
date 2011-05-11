@@ -253,7 +253,7 @@ sub setear_salida {
 		}
 
 		# Leo del archivo de configuracion la variable SECUENCIA_LISTADOS a traves del script service_instula_conf.sh
-		my $SECUENCIA_LISTADOS = `./service_instula_conf.sh SECUENCIA_LISTADOS`;
+		my $SECUENCIA_LISTADOS = `service_instula_conf.sh SECUENCIA_LISTADOS`;
 		my $codigo_retorno = `echo $?`;
 		if ($codigo_retorno != 0) {
 			print "Ocurrio un error al ejecutar \"service_instula_conf.sh\".\n";
@@ -276,7 +276,7 @@ sub setear_salida {
 		}
 
 		# Actualizo SECUENCIA_LISTADOS en el archivo de configuracion
-		$SECUENCIA_LISTADOS = `./service_instula_conf.sh SECUENCIA_LISTADOS $SECUENCIA_LISTADOS`;
+		$SECUENCIA_LISTADOS = `service_instula_conf.sh SECUENCIA_LISTADOS $SECUENCIA_LISTADOS`;
 		$codigo_retorno = `echo $?`;
 		if ($codigo_retorno != 0) {
 			print "Ocurrio un error al ejecutar \"service_instula_conf.sh\".\n";
