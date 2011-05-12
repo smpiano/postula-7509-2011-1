@@ -113,6 +113,22 @@ checkCamposNovedad() {
     fi
   done
 
+  if [[ ${#ARRAY_NOVEDAD[0]} -ne 11 ]]; then
+    rechazarBeneficio "Campo ${CAMPOS_NOVEDAD[0]} tiene longitud errónea"
+  fi
+
+  if [[ ! "${ARRAY_NOVEDAD[0]}" =~ ^[0-9]*$ ]]; then
+    rechazarBeneficio "Campo ${CAMPOS_NOVEDAD[0]} no tiene formato numérico"
+  fi
+
+  if [[ ${#ARRAY_NOVEDAD[2]} -ne 9 ]]; then
+    rechazarBeneficio "Campo ${CAMPOS_NOVEDAD[2]} tiene longitud errónea"
+  fi
+
+  if [[ ! "${ARRAY_NOVEDAD[2]}" =~ ^[0-9]*$ ]]; then
+    rechazarBeneficio "Campo ${CAMPOS_NOVEDAD[2]} no tiene formato numérico"
+  fi
+
   datos_beneficio=`buscar_beneficio ${ARRAY_NOVEDAD[8]}`
   if [[ -z "$datos_beneficio" ]]; then
     rechazarBeneficio "No existe beneficio ${ARRAY_NOVEDAD[8]}"
