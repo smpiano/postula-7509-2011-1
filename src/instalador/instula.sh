@@ -34,6 +34,11 @@ ARCHIVO_LOG="$CONFDIR/instula.log"
 antesDeInstula () {
 	# TODO borrar o arreglar
 	#$TARDIR/creacionDirectorioGrupoInstula.sh grupo02 $CURRDIR
+	if [ ! -f "$TARDIR/creacionDirectorioGrupoInstula.sh" ]
+	then
+		loguear "El instalador necesita del archivo \"$TARDIR/creacionDirectorioGrupoInstula.sh\" para poder instalar"
+		exit 1
+	fi
 	$TARDIR/creacionDirectorioGrupoInstula.sh conf $GRUPO
 	$TARDIR/creacionDirectorioGrupoInstula.sh data $GRUPO
 	$TARDIR/creacionDirectorioGrupoInstula.sh inst $GRUPO
@@ -123,33 +128,74 @@ postulaIncompleto () {
 	fin
 }
 
-# TODO
-isPostulaInstalado () {
-	if [ -f "$INSTULA_CONF" ]
+verificarComponentesExistentes () {
+	local bindir_configurado="$1"
+	cd "$bindir_configurado"
+	local user="`./service_instula_conf.sh USERID`"
+	local fecha_postini="`./service_instula_conf.sh POSTINI`"
+	local fecha_postonio="`./service_instula_conf.sh POSTONIO`"
+	local fecha_postular="`./service_instula_conf.sh POSTULAR`"
+	local fecha_postlist="`./service_instula_conf.sh POSTLIST`"
+	if [ ! -z "$user" -a ! -z "$fecha_postini" -a ! -z "$fecha_postonio" -a ! -z "$fecha_postular" -a ! -z "$fecha_postlist" -a -x "postini.sh" -a -x "postonio.sh" -a -x "postular.sh" -a -x "plist.pl" ]
 	then
-		local bindir_configurado="`cat "$INSTULA_CONF" | grep 'BINDIR' | cut -f2 -d\=`"
-		cd "$bindir_configurado"
-		# La instacion esta completa si:
-		# - Las variables de entorno estan en instula.conf
-		# - Los componentes existen
-		local user="`./service_instula_conf.sh USERID`"
-		local fecha_postini="`./service_instula_conf.sh POSTINI`"
-		local fecha_postonio="`./service_instula_conf.sh POSTONIO`"
-		local fecha_postular="`./service_instula_conf.sh POSTULAR`"
-		local fecha_postlist="`./service_instula_conf.sh POSTLIST`"
-		local componente_postini="postini.sh"
-		local componente_postonio="postonio.sh"
-		local componente_postular="postular.sh"
-		local componente_postlist="plist.pl"
-		if [ ! -z "$user" -a ! -z "$fecha_postini" -a ! -z "$fecha_postonio" -a ! -z "$fecha_postular" -a ! -z "$fecha_postlist" -a -x "$componente_postini" -a -x "$componente_postonio" -a -x "$componente_postular" -a -x "$componente_postlist" ]
+		#Paso 2.1
+		postulaInstalado "$user" "$fecha_postini" "$fecha_postonio" "$fecha_postular" "$fecha_postlist";
+	else
+		#Paso 2.2
+		postulaIncompleto "postini.sh" "postonio.sh" "postular.sh" "plist.pl";
+	fi
+	cd "$CURRDIR"
+	exit 1;
+}
+
+isPostulaInstalado () {
+	# La instacion esta completa si:
+	# - Las variables de entorno estan en instula.conf
+	# - Los componentes existen
+	# Si POSTINI no se ha corrido aún
+	if [ -z "$POSTULA_ENV" ]
+	then
+		# Si existe el archivo de configuración
+		if [ -f "$INSTULA_CONF" ]
 		then
-			#Paso 2.1
-			postulaInstalado "$user" "$fecha_postini" "$fecha_postonio" "$fecha_postular" "$fecha_postlist";
+			local bindir_configurado="`cat "$INSTULA_CONF" | grep 'BINDIR' | cut -f2 -d\=`"
+			if [ -f "$bindir_configurado/service_instula_conf.conf" -a -f "$bindir_configurado/service_instula_conf.sh" ]
+			then
+				loguear "################## CASO 1 : Postini no se corrio, existe configuracion y servicios ########################" s
+				verificarComponentesExistentes "$bindir_configurado"
+			else
+				loguear "################## CASO 2 : Postini no se corrio, existe configuracion, faltan servicios ########################" s
+				loguear "El instalador detectó que existe el archivo de configuración pero faltan los servicios."
+				loguear "Falta de algunas herramientas \"$bindir_configurado/service_instula_conf.conf\" y/o \"$bindir_configurado/service_instula_conf.sh\""
+				procesoCancelado
+				fin
+				exit 1
+			fi
 		else
-			#Paso 2.2
-			postulaIncompleto "$componente_postini" "$componente_postonio" "$componente_postular" "$componente_postlist";
+			loguear "################## CASO 3 : Postini no se corrio, no existe configuracion ni servicios (CASO IDEAL) ########################" s
+			loguear "Verificación correcta para comenzar con la instalación."
 		fi
-		cd "$CURRDIR"
+	else
+		# Si existe el archivo de configuración
+		if [ -f "$INSTULA_CONF" ]
+		then
+			local bindir_configurado="`cat "$INSTULA_CONF" | grep 'BINDIR' | cut -f2 -d\=`"
+			if [ -f "$bindir_configurado/service_instula_conf.conf" -a -f "$bindir_configurado/service_instula_conf.sh" ]
+			then
+				loguear "################## CASO 4 : Postini se corrio, existe configuracion y servicios ########################" s
+				verificarComponentesExistentes "$bindir_configurado"
+			else
+				loguear "################## CASO 5 : Postini se corrio, existe configuracion pero no servicios ########################" s
+				loguear "El instalador detectó que existe el archivo de configuración y el ambiente ya se encuentra inicializado por POSTINI."
+				loguear "Falta de algunas herramientas \"$bindir_configurado/service_instula_conf.conf\" y/o \"$bindir_configurado/service_instula_conf.sh\""
+			fi
+		else
+			loguear "################## CASO 6 : Postini se corrio, no existe configuracion ni servicios ########################" s
+			loguear "El instalador detectó que POSTINI se está corriendo y no existe configuración ni servicios"
+			loguear "Se recomienda abrir una terminal nueva, borrar e instalar nuevamente el paquete POSTULA"
+		fi
+		procesoCancelado
+		fin
 		exit 1;
 	fi
 }
@@ -303,7 +349,7 @@ validarSize () {
 ########## PASO 6 : DEFINIR DIRECTORIO DE EJECUTABLES ##########
 definirDirectorioEjecutables () {
 	local default="$BINDIR"
-	loguear "Ingrese el nombre del subdirectorio de ejecutables ($BINDIR): \\c"
+	loguear "Ingrese el nombre del subdirectorio de ejecutables (`echo "$BINDIR" | sed "s|$GRUPO\/||"`): \\c"
 	read BINDIR
 	loguear "$BINDIR" s
 	validarPath "$BINDIR" "$default"
@@ -313,7 +359,7 @@ definirDirectorioEjecutables () {
 ########## PASO 7 : DEFINIR DIRECTORIO DE ARRIBO DE ARCHIVOS EXTERNOS ##########
 definirDirectorioArriboArchivos () {
 	local default="$ARRIDIR"
-	loguear "Ingrese el nombre del directorio que permite el arribo de archivos externos ($ARRIDIR): \\c"
+	loguear "Ingrese el nombre del directorio que permite el arribo de archivos externos (`echo "$ARRIDIR" | sed "s|$GRUPO\/||"`): \\c"
 	read ARRIDIR
 	loguear "$ARRIDIR" s
 	validarPath "$ARRIDIR" "$default"
@@ -332,7 +378,7 @@ definirEspacioMinimoDatos () {
 
 ########## PASO 9 : VERIFICAR ESPACIO EN DISCO ##########
 verificarEspacioEnDisco () {
-	local available_space=`df -BM . | sed 's/ \+/,/g' | cut -f4 -d, | grep '[0-9]' | sed 's/M//'`
+	local available_space=`df -BM . | sed 's/ \+/,/g' | cut -f4 -d, | tail -1 | sed 's/M//'`
 	if [ $available_space -lt $DATASIZE ]
 	then
 		loguear "    	ERROR !:"
@@ -347,7 +393,7 @@ verificarEspacioEnDisco () {
 ########## PASO 10 : DEFINIR DIRECTORIO ARCHIVOS DE LOG DE LOS COMANDOS ##########
 definirDirectorioArchivosLog () {
 	local default="$LOGDIR"
-	loguear "Ingrese el nombre del directorio de log ($LOGDIR): \\c"
+	loguear "Ingrese el nombre del directorio de log (`echo "$LOGDIR" | sed "s|$GRUPO\/||"`): \\c"
 	read LOGDIR
 	loguear "$LOGDIR" s
 	validarPath "$LOGDIR" "$default"
