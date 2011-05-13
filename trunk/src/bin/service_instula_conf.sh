@@ -29,6 +29,7 @@ fi
 if [ ! -f "$COMPLETE/service_instula_conf.conf" ]
 then
 	echo "No se puede inicializar el servicio, requiere de $COMPLETE/service_instula_conf.conf"
+	return
 else
 	INSTULA_CONF="`cat "$COMPLETE/service_instula_conf.conf"`"
 fi
