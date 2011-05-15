@@ -21,7 +21,7 @@ POSTINI=""
 POSTONIO=""
 POSTULAR=""
 POSTLIST=""
-POSTONIO_TIEMPO_ESPERA="10"
+POSTONIO_TIEMPO_ESPERA="10"	# Tiempo de sleep de demonio medido en segundos
 PATH_VALIDO=""
 SIZE_VALIDO=""
 ACEPTO_TERMINOS="no"
@@ -172,7 +172,7 @@ isPostulaInstalado () {
 				exit 1
 			fi
 		else
-			loguear "################## CASO 3 : Postini no se corrio, no existe configuracion ni servicios (CASO IDEAL) ########################" s
+			loguear "################## CASO 3 : Postini no se corrio, no existe configuracion (CASO IDEAL) ########################" s
 			loguear "Verificación correcta para comenzar con la instalación."
 		fi
 	else
@@ -190,8 +190,8 @@ isPostulaInstalado () {
 				loguear "Falta de algunas herramientas \"$bindir_configurado/service_instula_conf.conf\" y/o \"$bindir_configurado/service_instula_conf.sh\""
 			fi
 		else
-			loguear "################## CASO 6 : Postini se corrio, no existe configuracion ni servicios ########################" s
-			loguear "El instalador detectó que POSTINI se está corriendo y no existe configuración ni servicios"
+			loguear "################## CASO 6 : Postini se corrio, no existe configuracion ########################" s
+			loguear "El instalador detectó que POSTINI se está corriendo y no existe configuración"
 			loguear "Se recomienda abrir una terminal nueva, borrar e instalar nuevamente el paquete POSTULA"
 		fi
 		procesoCancelado

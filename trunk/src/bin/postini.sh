@@ -58,6 +58,15 @@ then
   evariables
 else
   # Seteo las variables de entorno para la sesion del usuario (la idea seria que me lleguen como parametro)
+  DATADIR="`./service_instula_conf.sh DATADIR`"
+  MAESTRO_AGENCIAS="$DATADIR/agencias.mae"
+  MAESTRO_BENEFICIOS="$DATADIR/beneficios.mae"
+
+  if [ ! -f "$MAESTRO_AGENCIAS" -o ! -f "$MAESTRO_BENEFICIOS" ]
+  then
+    echo "Postini no puede correrse debido a la falta de existencia de los archivos MAESTROS"
+    return
+  fi
   CURRDIR="$PWD"					# Directorio Actual de trabajo
   GRUPO="`./service_instula_conf.sh CURRDIR`"		# Directorio del grupo
   ARRIDIR="`./service_instula_conf.sh ARRIDIR`"		# Directorio de arribos de archivos externos
@@ -71,14 +80,11 @@ else
   FECINS="`date +%d/%m/%Y\ %H:%M`"  # Fecha y Hora de inicio de instalacion
   POSTULA_ENV="Loaded"
   POSTONIO_TIEMPO_ESPERA="`./service_instula_conf.sh POSTONIO_TIEMPO_ESPERA`"
-  DATADIR="`./service_instula_conf.sh DATADIR`"
   NUEVOS="`./service_instula_conf.sh NUEVOS`"
   RECIBIDOS="`./service_instula_conf.sh RECIBIDOS`"
   RECHAZADOS="`./service_instula_conf.sh RECHAZADOS`"
   PROCESADOS="`./service_instula_conf.sh PROCESADOS`"
   LISTDIR="`./service_instula_conf.sh LISTDIR`"
-  MAESTRO_AGENCIAS="$DATADIR/agencias.mae"
-  MAESTRO_BENEFICIOS="$DATADIR/beneficios.mae"
 
   # Valido la existencia
   #exist $GRUPO
@@ -88,7 +94,7 @@ else
   #exist $LOGDIR
 
   # Seteo la variable PATH
-  PATH="$PATH:$GRUPO:$BINDIR"
+  PATH="$PATH:$BINDIR"
 
   # Exporto las variables
   export GRUPO
